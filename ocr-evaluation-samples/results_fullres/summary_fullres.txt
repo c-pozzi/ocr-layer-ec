@@ -1,0 +1,45 @@
+OCR Evaluation Summary - FULL RESOLUTION
+======================================================================
+Date: 2026-01-28 15:28:45
+Directory: /home/ubuntu/ocr-evaluation-samples/
+Mode: FULL RESOLUTION (no downscaling)
+PDF render DPI: 300
+Total documents: 31
+Successful: 31 (TIF: 31, PDF: 0)
+Failed: 0
+Total pages: 31
+
+Average image size: 2462 × 3416 px
+
+TIMING BREAKDOWN:
+  PDF text extraction: 0.14s
+  Image loading:       1.41s
+  Base64 encoding:     32.79s
+  MODEL INFERENCE:     70.08s
+  CER calculation:     0.08s
+  TOTAL:               104.51s
+
+MODEL INFERENCE STATISTICS:
+  Total inference time: 552.71s
+  Avg per page:         17.83s
+  Throughput:           0.44 pages/sec
+
+CER Statistics:
+  Qwen VLM OCR:
+    Mean:   4.75%
+    Median: 1.52%
+    Min:    0.00%
+    Max:    39.42%
+
+  PDF OCR Layer:
+    Mean:   13.35%
+    Median: 6.70%
+    Min:    2.63%
+    Max:    92.14%
+
+Comparison:
+  Qwen better: 31 documents
+  PDF better:  0 documents
+  Avg improvement: +8.60%
+
+Total time: 104.51s

@@ -1,0 +1,42 @@
+OCR Evaluation Summary - Qwen2.5-VL-72B
+======================================================================
+Date: 2026-01-22 11:32:40
+Model: Qwen/Qwen2.5-VL-72B-Instruct
+Directory: /home/ubuntu/ocr-evaluation-samples/
+Total documents: 31
+Successful: 31
+Failed: 0
+Total pages: 31
+
+TIMING BREAKDOWN:
+  PDF text extraction: 0.14s
+  Image loading:       14.37s
+  Base64 encoding:     3.37s
+  MODEL INFERENCE:     512.92s
+  CER calculation:     0.08s
+  TOTAL:               530.88s
+
+MODEL INFERENCE STATISTICS:
+  Total inference time: 6268.30s
+  Avg per page:         202.20s
+  Throughput:           0.06 pages/sec
+
+CER Statistics:
+  AI Model (72B):
+    Mean:   4.57%
+    Median: 0.86%
+    Min:    0.00%
+    Max:    45.00%
+
+  PDF CoDe:
+    Mean:   13.35%
+    Median: 6.70%
+    Min:    2.63%
+    Max:    92.14%
+
+Comparison:
+  AI Model better: 30 documents
+  PDF better:      1 documents
+  Avg improvement: +8.78%
+
+Total time: 530.88s

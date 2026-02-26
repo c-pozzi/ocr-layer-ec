@@ -1,0 +1,220 @@
+OCR Evaluation Summary (Classification-Based Prompts)
+======================================================================
+Date: 2026-02-04 13:16:26
+Samples directory: /home/ubuntu/ocr-evaluation-samples
+Classification CSV: /home/ubuntu/eval-scripts/vllm/Qw7b/results_classify/classification_results.csv
+Output directory: /home/ubuntu/eval-scripts/vllm/Qw7b/results_classify/ocr_outputs
+
+Documents: 31 (31 successful, 0 failed)
+Total pages: 31
+Total time: 135.58s
+Avg time per page: 4.37s
+Throughput: 0.23 pages/sec
+
+CER Statistics:
+  Classified Prompt OCR:
+    Mean:   42.86%
+    Median: 2.02%
+    Min:    0.00%
+    Max:    938.77%
+
+  PDF OCR Layer:
+    Mean:   13.35%
+    Median: 6.70%
+    Min:    2.63%
+    Max:    92.14%
+
+Comparison vs PDF OCR:
+  Classified better: 28 documents
+  PDF better:        3 documents
+  Avg improvement:   -29.51%
+
+
+Per-Document Results:
+----------------------------------------------------------------------
+BAC-0020-1973-0401_0258:
+  Pages: 1
+  Classified CER: 2.58%
+  PDF OCR CER: 7.42%
+  Inference time: 10.59s
+
+BAC-0040-1980-0062_0334:
+  Pages: 1
+  Classified CER: 1.84%
+  PDF OCR CER: 5.98%
+  Inference time: 7.95s
+
+BAC-0066-1985-0022_0251:
+  Pages: 1
+  Classified CER: 938.77%
+  PDF OCR CER: 6.47%
+  Inference time: 115.87s
+
+BAC-0066-1985-0150_0168:
+  Pages: 1
+  Classified CER: 7.89%
+  PDF OCR CER: 11.17%
+  Inference time: 7.89s
+
+BAC-0101-1999-0232_0084:
+  Pages: 1
+  Classified CER: 2.81%
+  PDF OCR CER: 16.96%
+  Inference time: 6.41s
+
+BAC-0101-1999-0906_0066:
+  Pages: 1
+  Classified CER: 4.60%
+  PDF OCR CER: 16.60%
+  Inference time: 3.98s
+
+BAC-0128-1983-0381_0212:
+  Pages: 1
+  Classified CER: 0.86%
+  PDF OCR CER: 5.39%
+  Inference time: 7.75s
+
+BAC-0214-1980-0030_0174:
+  Pages: 1
+  Classified CER: 1.37%
+  PDF OCR CER: 7.72%
+  Inference time: 5.64s
+
+BAC-0250-1980-0081_0024:
+  Pages: 1
+  Classified CER: 1.49%
+  PDF OCR CER: 6.70%
+  Inference time: 7.46s
+
+BAC-0250-1980-0555_0010:
+  Pages: 1
+  Classified CER: 9.74%
+  PDF OCR CER: 11.85%
+  Inference time: 4.95s
+
+BAC-0250-1980-1218_0004:
+  Pages: 1
+  Classified CER: 3.53%
+  PDF OCR CER: 15.17%
+  Inference time: 3.03s
+
+BAC-0371-1991-2275_0045:
+  Pages: 1
+  Classified CER: 2.02%
+  PDF OCR CER: 5.22%
+  Inference time: 6.48s
+
+BAC-0371-1991-2419_0492:
+  Pages: 1
+  Classified CER: 0.42%
+  PDF OCR CER: 3.18%
+  Inference time: 9.81s
+
+BAC-0371-1991-3026_0574:
+  Pages: 1
+  Classified CER: 10.29%
+  PDF OCR CER: 15.08%
+  Inference time: 17.66s
+
+BAC-0371-1991-3445_0099:
+  Pages: 1
+  Classified CER: 1.04%
+  PDF OCR CER: 2.94%
+  Inference time: 5.77s
+
+BAC-0565-1995-0080_0019:
+  Pages: 1
+  Classified CER: 98.34%
+  PDF OCR CER: 2.68%
+  Inference time: 0.72s
+
+INV-0003-2018-0928_0235:
+  Pages: 1
+  Classified CER: 11.88%
+  PDF OCR CER: 24.72%
+  Inference time: 3.55s
+
+INV-0006-2019-0052_0177:
+  Pages: 1
+  Classified CER: 1.76%
+  PDF OCR CER: 6.92%
+  Inference time: 4.20s
+
+INV-0006-2019-0521_0039:
+  Pages: 1
+  Classified CER: 0.12%
+  PDF OCR CER: 3.92%
+  Inference time: 5.99s
+
+INV-0006-2020-0098_0210:
+  Pages: 1
+  Classified CER: 0.73%
+  PDF OCR CER: 6.01%
+  Inference time: 6.28s
+
+INV-0006-2023-1283_0302:
+  Pages: 1
+  Classified CER: 5.44%
+  PDF OCR CER: 92.14%
+  Inference time: 4.78s
+
+INV-0012-2021-0057-0001_0222:
+  Pages: 1
+  Classified CER: 45.23%
+  PDF OCR CER: 50.08%
+  Inference time: 3.11s
+
+INV-0012-2021-0622-0001_0096:
+  Pages: 1
+  Classified CER: 0.26%
+  PDF OCR CER: 2.90%
+  Inference time: 7.00s
+
+INV-0012-2021-1192-0001_0013:
+  Pages: 1
+  Classified CER: 0.00%
+  PDF OCR CER: 2.87%
+  Inference time: 5.93s
+
+INV-0013-2019-0159_0020:
+  Pages: 1
+  Classified CER: 2.78%
+  PDF OCR CER: 17.40%
+  Inference time: 4.83s
+
+INV-0013-2019-0172_0082:
+  Pages: 1
+  Classified CER: 0.20%
+  PDF OCR CER: 3.87%
+  Inference time: 9.28s
+
+INV-0013-2019-0230_0204:
+  Pages: 1
+  Classified CER: 0.17%
+  PDF OCR CER: 2.63%
+  Inference time: 11.46s
+
+INV-0013-2019-0926_0047:
+  Pages: 1
+  Classified CER: 164.81%
+  PDF OCR CER: 42.85%
+  Inference time: 113.93s
+
+INV-0013-2019-0998_0187:
+  Pages: 1
+  Classified CER: 4.99%
+  PDF OCR CER: 8.66%
+  Inference time: 3.93s
+
+INV-0014-2020-0267_0018:
+  Pages: 1
+  Classified CER: 1.63%
+  PDF OCR CER: 4.57%
+  Inference time: 7.35s
+
+INV-0022-2019-0107_0233:
+  Pages: 1
+  Classified CER: 1.06%
+  PDF OCR CER: 3.76%
+  Inference time: 5.98s
+

@@ -1,0 +1,41 @@
+OCR Evaluation Summary
+======================================================================
+Date: 2026-01-28 14:58:06
+Directory: /home/ubuntu/ocr-evaluation-samples/
+Total documents: 31
+Successful: 31
+Failed: 0
+Total pages: 31
+
+TIMING BREAKDOWN:
+  PDF text extraction: 0.14s
+  Image loading:       14.38s
+  Base64 encoding:     3.38s
+  MODEL INFERENCE:     44.62s
+  CER calculation:     0.09s
+  TOTAL:               62.60s
+
+MODEL INFERENCE STATISTICS:
+  Total inference time: 337.89s
+  Avg per page:         10.90s
+  Throughput:           0.69 pages/sec
+
+CER Statistics:
+  Qwen VLM OCR:
+    Mean:   5.49%
+    Median: 1.37%
+    Min:    0.00%
+    Max:    50.04%
+
+  PDF OCR Layer:
+    Mean:   13.35%
+    Median: 6.70%
+    Min:    2.63%
+    Max:    92.14%
+
+Comparison:
+  Qwen better: 30 documents
+  PDF better:  1 documents
+  Avg improvement: +7.86%
+
+Total time: 62.60s

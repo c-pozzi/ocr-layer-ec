@@ -1,0 +1,105 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.manifest
+*.spec
+
+# Virtual environments / Conda
+.venv/
+venv/
+env/
+miniconda3/
+Miniconda2-latest-Linux-x86_64.sh
+Miniconda3-latest-Linux-x86_64.sh
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ML / Model artifacts
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.bin
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+wandb/
+mlruns/
+runs/
+checkpoints/
+
+# HuggingFace cache
+.cache/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# NVIDIA / DLAMI / system files
+gds-nvidia-fs/
+nvidia-acknowledgements/
+OSSNvidiaDriver_v580.95.05_license.txt
+BUILD_FROM_SOURCE_PACKAGES_LICENCES
+LINUX_PACKAGES_LICENSES
+LINUX_PACKAGES_LIST
+PYTHON_PACKAGES_LICENSES
+THIRD_PARTY_SOURCE_CODE_URLS
+cleanup.sh
+
+# Large binary data directories
+archive/
+ocr-input/
+
+# Large binary files in evaluation samples
+ocr-evaluation-samples/*.tif
+ocr-evaluation-samples/*.pdf
+
+# Claude Code internal
+.claude/
+.claude.json
+.claude.json.tmp.*
+
+# Shell / User dotfiles
+.bash_history
+.bash_logout
+.bashrc
+.profile
+.sudo_as_admin_successful
+.wget-hsts
+
+# SSH / GPG
+.ssh/
+.gnupg/
+
+# System / tool directories
+.conda/
+.config/
+.copilot/
+.dotnet/
+.local/
+.streamlit/
+.triton/
+.vscode-server/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.*

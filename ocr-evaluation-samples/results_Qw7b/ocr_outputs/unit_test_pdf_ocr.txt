@@ -1,0 +1,3 @@
+The quick brown fox jumps over the lazy dog.
+Th1s 1s a test d0cument f0r 0CR evaluat1on.
+Numbers: I2345 and symb0ls: @#$%

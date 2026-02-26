@@ -1,0 +1,3 @@
+The quikk brown fax jumps ovre the lasy dog.
+This is a tset documnet for OCR evaluaton.
+Numbers: 12345 and simbols: @#$%
