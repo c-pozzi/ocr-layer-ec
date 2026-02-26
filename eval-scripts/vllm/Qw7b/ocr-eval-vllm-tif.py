@@ -535,8 +535,9 @@ def main(eval_dir: str, dpi: int = 300):
         print(f"Avg improvement: {avg_improvement:>+.2%} (positive = Qwen better)")
         print(f"{'='*70}")
     
-    # Save detailed results
-    output_dir = eval_path / "results_fullres"
+    # Save detailed results (relative to this script)
+    script_dir = Path(__file__).resolve().parent
+    output_dir = script_dir / "results_fullres"
     output_dir.mkdir(exist_ok=True)
     
     # Save CER results to CSV

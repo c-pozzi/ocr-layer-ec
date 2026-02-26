@@ -34,10 +34,11 @@ from prompts import build_prompt
 # CONFIGURATION
 # =============================================================================
 
-# Paths
-SAMPLES_DIR = Path("/home/ubuntu/ocr-evaluation-samples")
-CLASSIFICATION_CSV = Path("/home/ubuntu/eval-scripts/vllm/Qw7b/results_classify/classification_results.csv")
-OUTPUT_DIR = Path("/home/ubuntu/eval-scripts/vllm/Qw7b/results_classify/ocr_outputs")
+# Paths (relative to this script)
+SCRIPT_DIR = Path(__file__).resolve().parent
+SAMPLES_DIR = SCRIPT_DIR.parents[2] / "ocr-evaluation-samples"
+CLASSIFICATION_CSV = SCRIPT_DIR / "results_classify" / "classification_results.csv"
+OUTPUT_DIR = SCRIPT_DIR / "results_classify" / "ocr_outputs"
 
 # vLLM server configuration
 VLLM_SERVERS = [f"http://localhost:{8000 + i}" for i in range(8)]

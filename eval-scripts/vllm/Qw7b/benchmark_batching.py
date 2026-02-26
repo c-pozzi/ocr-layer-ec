@@ -322,7 +322,7 @@ async def main():
             print(f"\n🚀 Throughput improvement: {best/baseline:.1f}x (from concurrency={all_stats[0]['concurrency_per_server']} to best)")
     
     # Save results
-    output_file = Path("benchmark_results.json")
+    output_file = Path(__file__).resolve().parent / "benchmark_results.json"
     with open(output_file, "w") as f:
         json.dump(all_stats, f, indent=2)
     print(f"\nResults saved to {output_file}")

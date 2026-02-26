@@ -427,8 +427,9 @@ def main(eval_dir: str, dpi: int = 150):
         print(f"Total pages: {sum(r['num_pages'] for r in successful)}")
         print(f"{'='*70}")
     
-    # Save detailed results
-    output_dir = eval_path / "results"
+    # Save detailed results (relative to this script)
+    script_dir = Path(__file__).resolve().parent
+    output_dir = script_dir / "results"
     output_dir.mkdir(exist_ok=True)
     
     # Save CER results to CSV

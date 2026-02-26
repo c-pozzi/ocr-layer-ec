@@ -97,8 +97,9 @@ MODEL_NAME = "Qwen/Qwen2.5-VL-72B-Instruct"
 # Reduced concurrency since we have fewer servers
 MAX_CONCURRENT = 32
 
-# Output directory for 72B results
-OUTPUT_DIR = Path("/home/ubuntu/ocr-evaluation-samples/results_Qw72b")
+# Output directory for 72B results (relative to this script)
+SCRIPT_DIR = Path(__file__).resolve().parent
+OUTPUT_DIR = SCRIPT_DIR / "results"
 # ============================================================================
 
 PROMPT = """Extract all text from this document image,

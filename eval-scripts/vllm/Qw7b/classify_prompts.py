@@ -21,9 +21,10 @@ from prompts import get_classify_prompt
 # CONFIGURATION
 # =============================================================================
 
-# Input/Output paths
-INPUT_DIR = Path("/home/ubuntu/ocr-evaluation-samples")
-OUTPUT_DIR = Path("/home/ubuntu/eval-scripts/vllm/Qw7b/results_classify")
+# Input/Output paths (relative to this script)
+SCRIPT_DIR = Path(__file__).resolve().parent
+INPUT_DIR = SCRIPT_DIR.parents[2] / "ocr-evaluation-samples"
+OUTPUT_DIR = SCRIPT_DIR / "results_classify"
 OUTPUT_CSV = OUTPUT_DIR / "classification_results.csv"
 
 # vLLM server configuration

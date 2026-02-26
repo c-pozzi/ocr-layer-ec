@@ -10,8 +10,9 @@ import difflib
 import re
 from typing import Tuple, List
 
-# Configuration
-OCR_OUTPUTS_DIR = Path("/home/ubuntu/ocr-evaluation-samples/results_Qw7b/ocr_outputs") 
+# Configuration (relative to this script)
+SCRIPT_DIR = Path(__file__).resolve().parent
+OCR_OUTPUTS_DIR = SCRIPT_DIR.parent / "results" / "ocr_outputs"
 
 st.set_page_config(
     page_title="OCR Comparison Tool",
