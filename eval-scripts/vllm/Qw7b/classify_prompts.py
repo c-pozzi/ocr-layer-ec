@@ -3,8 +3,12 @@ Document Classification Script
 
 Reads PDFs from evaluation samples and classifies them using vLLM server.
 Outputs results to CSV.
+
+Usage:
+    python classify_prompts.py [--model {bf16,int4}]
 """
 
+import argparse
 import asyncio
 import aiohttp
 import base64
@@ -18,6 +22,23 @@ import fitz  # PyMuPDF for PDF reading
 from prompts import get_classify_prompt
 
 # =============================================================================
+# CLI ARGUMENTS
+# =============================================================================
+
+MODEL_CONFIGS = {
+    "bf16": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "int4": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+}
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Classify documents using vLLM server")
+    parser.add_argument(
+        "--model", choices=list(MODEL_CONFIGS.keys()), default="bf16",
+        help="Model variant to use: bf16 (default) or int4 (AWQ quantized)"
+    )
+    return parser.parse_args()
+
+# =============================================================================
 # CONFIGURATION
 # =============================================================================
 
@@ -25,12 +46,11 @@ from prompts import get_classify_prompt
 SCRIPT_DIR = Path(__file__).resolve().parent
 INPUT_DIR = SCRIPT_DIR.parents[2] / "ocr-evaluation-samples"
 OUTPUT_DIR = SCRIPT_DIR / "results_classify"
-OUTPUT_CSV = OUTPUT_DIR / "classification_results.csv"
 
 # vLLM server configuration
 VLLM_SERVERS = [f"http://localhost:{8000 + i}" for i in range(8)]
 VLLM_ENDPOINT = "/v1/chat/completions"
-MODEL_NAME = "Qwen/Qwen2.5-VL-7B-Instruct"
+MODEL_NAME = MODEL_CONFIGS["bf16"]  # overridden in main() based on --model arg
 
 # Concurrency
 MAX_CONCURRENCY = 8
@@ -227,17 +247,25 @@ def flatten_classification(classification: dict) -> dict:
 
 async def main():
     """Main entry point."""
+    args = parse_args()
+
+    # Set model name based on variant
+    global MODEL_NAME
+    MODEL_NAME = MODEL_CONFIGS[args.model]
+    OUTPUT_CSV = OUTPUT_DIR / f"classification_results_{args.model}.csv"
+
     # Create output directory
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     # Find PDF files
     pdf_files = find_pdf_files(INPUT_DIR)
-    
+
     if not pdf_files:
         print(f"No PDF files found in {INPUT_DIR}")
         return
-    
+
     print(f"Found {len(pdf_files)} PDF files")
+    print(f"Model variant: {args.model} ({MODEL_NAME})")
     print(f"Using {len(VLLM_SERVERS)} vLLM servers")
     print(f"Output: {OUTPUT_CSV}")
     print("-" * 60)
