@@ -9,11 +9,11 @@ Reads classification.csv and generates comprehensive statistics:
 - Feature co-occurrence matrix
 
 Usage:
-    python poc_report.py
-    python poc_report.py --classification results/classification.csv
-    python poc_report.py --classification results/classification.csv --save
+    python poc_report.py --run-dir results/awq__BAC-0002-1971
+    python poc_report.py --run-dir results/awq__BAC-0002-1971 --save
+    python poc_report.py --list
 
-Output: printed to stdout + optionally saved to results/poc_report.txt
+Output: printed to stdout + optionally saved to <run_dir>/poc_report.txt
 """
 
 import argparse
@@ -41,15 +41,27 @@ TIMING_FIELDS = [
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate POC classification report")
     parser.add_argument(
+        "--run-dir",
+        type=str,
+        default=None,
+        help="Run directory (auto-finds classification.csv + meta.json inside)",
+    )
+    parser.add_argument(
         "--classification",
         type=str,
-        default=str(RESULTS_DIR / "classification.csv"),
-        help="Path to classification CSV (default: results/classification.csv)",
+        default=None,
+        help="Path to classification CSV (default: <run_dir>/classification.csv)",
     )
     parser.add_argument(
         "--save",
         action="store_true",
-        help="Save report to results/poc_report.txt",
+        help="Save report to <run_dir>/poc_report.txt",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        dest="list_runs",
+        help="List all runs with summary stats",
     )
     return parser.parse_args()
 
@@ -356,11 +368,21 @@ def load_metadata(classification_path: Path) -> dict | None:
 
 def generate_report(rows: list[dict], meta: dict | None = None) -> str:
     """Generate full report string."""
-    sections = [
+    header_lines = [
         "",
         "POC CLASSIFICATION REPORT",
         "=" * 70,
-        "",
+    ]
+    if meta:
+        header_lines.append(f"  Model:    {meta.get('model_name', '?')}")
+        header_lines.append(f"  Variant:  {meta.get('model', '?')}")
+        if meta.get("instance"):
+            header_lines.append(f"  Instance: {meta['instance']}")
+        header_lines.append(f"  Folder:   {meta.get('input_folder', '?')}")
+    header_lines.append("")
+
+    sections = [
+        *header_lines,
         section_distribution(rows),
         section_timing(rows),
         section_throughput(rows, meta),
@@ -374,10 +396,82 @@ def generate_report(rows: list[dict], meta: dict | None = None) -> str:
     return "\n".join(sections)
 
 
+def list_runs() -> str:
+    """Scan results/*/classification.meta.json and print summary table."""
+    lines = []
+    meta_files = sorted(RESULTS_DIR.glob("*/classification.meta.json"))
+    if not meta_files:
+        return "No runs found."
+
+    lines.append(f"{'Run':<30} {'Model':<6} {'Model Name':<35} {'Instance':<14} {'Folder':<20} {'Pages':>6} {'Simple%':>8} {'Complex%':>9} {'Wall time':>10} {'pages/s':>8}")
+    lines.append(f"{'-'*30} {'-'*6} {'-'*35} {'-'*14} {'-'*20} {'-'*6} {'-'*8} {'-'*9} {'-'*10} {'-'*8}")
+
+    for meta_path in meta_files:
+        run_name = meta_path.parent.name
+        with open(meta_path, "r") as f:
+            meta = json.load(f)
+
+        model = meta.get("model", "?")
+        model_name = meta.get("model_name", "?")
+        instance = meta.get("instance") or "-"
+        folder = meta.get("input_folder", "?")
+        pages = meta.get("pages_classified", 0)
+        wall_sec = meta.get("wall_time_sec", 0)
+        rate = meta.get("pages_per_sec", 0)
+
+        # Try to read classification.csv for simple/complex stats
+        cls_path = meta_path.parent / "classification.csv"
+        simple_pct = "?"
+        complex_pct = "?"
+        if cls_path.exists():
+            rows = load_classification(str(cls_path))
+            valid = [r for r in rows if r.get("error") in ("", "None", None)]
+            if valid:
+                n_complex = sum(1 for r in valid if r.get("is_complex") is True)
+                n_simple = len(valid) - n_complex
+                simple_pct = f"{100*n_simple/len(valid):.1f}%"
+                complex_pct = f"{100*n_complex/len(valid):.1f}%"
+
+        wall_min = f"{wall_sec/60:.1f}min"
+        lines.append(
+            f"{run_name:<30} {model:<6} {model_name:<35} {instance:<14} {folder:<20} {pages:>6} {simple_pct:>8} {complex_pct:>9} {wall_min:>10} {rate:>8.1f}"
+        )
+
+    return "\n".join(lines)
+
+
 def main():
     args = parse_args()
 
-    classification_path = Path(args.classification)
+    # --list mode: show summary of all runs
+    if args.list_runs:
+        print(list_runs())
+        return
+
+    # Resolve classification path
+    if args.run_dir:
+        run_dir = Path(args.run_dir)
+        if not run_dir.is_absolute():
+            run_dir = RESULTS_DIR / run_dir.name if (RESULTS_DIR / run_dir.name).exists() else Path(args.run_dir).resolve()
+        classification_path = run_dir / "classification.csv"
+    elif args.classification:
+        classification_path = Path(args.classification)
+        run_dir = classification_path.parent
+    else:
+        # Fallback: look for a single run dir
+        candidates = sorted(RESULTS_DIR.glob("*/classification.csv"))
+        if len(candidates) == 1:
+            classification_path = candidates[0]
+            run_dir = classification_path.parent
+        elif len(candidates) > 1:
+            print("Multiple runs found. Use --run-dir or --classification to specify:")
+            for c in candidates:
+                print(f"  {c.parent.name}")
+            sys.exit(1)
+        else:
+            print("ERROR: No classification results found. Run poc_2_classify.py first.")
+            sys.exit(1)
+
     if not classification_path.exists():
         print(f"ERROR: Classification file not found: {classification_path}")
         sys.exit(1)
@@ -393,8 +487,8 @@ def main():
     print(report)
 
     if args.save:
-        report_path = RESULTS_DIR / "poc_report.txt"
-        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+        report_path = run_dir / "poc_report.txt"
+        run_dir.mkdir(parents=True, exist_ok=True)
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(report)
         print(f"\nReport saved to: {report_path}")

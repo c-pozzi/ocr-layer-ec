@@ -1,4 +1,8 @@
 {
+  "model": "awq",
+  "model_name": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+  "input_folder": "BAC-0002-1971",
+  "instance": "g5.12xlarge",
   "wall_time_sec": 5880.3,
   "pages_classified": 9000,
   "total_errors": 0,

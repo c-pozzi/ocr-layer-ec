@@ -5,13 +5,9 @@ Scans local PDF directories (or downloads from S3) and creates a manifest
 with one row per page. Supports --max-pages to cap total page count.
 
 Usage:
-    # Local input (scan ~/ocr-input)
-    python poc_1_manifest.py --input ~/ocr-input --max-pages 9000
+    python poc_1_manifest.py --input ~/ocr-input/BAC-0002-1971 --model awq --max-pages 9000
 
-    # S3 input
-    python poc_1_manifest.py --input s3://bucket/prefix --max-pages 9000
-
-Output: results/manifest.csv
+Output: results/<model>__<input_basename>/manifest.csv
 """
 
 import argparse
@@ -23,8 +19,7 @@ from pathlib import Path
 
 import fitz  # PyMuPDF
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-RESULTS_DIR = SCRIPT_DIR / "results"
+from poc_utils import MODEL_CONFIGS, RESULTS_DIR, make_run_dir
 
 # S3 staging directory (fast NVMe)
 S3_STAGING_DIR = Path("/opt/dlami/nvme/poc_staging")
@@ -46,10 +41,16 @@ def parse_args():
         help="Stop adding PDFs once cumulative page count reaches this value",
     )
     parser.add_argument(
+        "--model",
+        choices=list(MODEL_CONFIGS.keys()),
+        default="awq",
+        help="Model variant (default: awq)",
+    )
+    parser.add_argument(
         "--output",
         type=str,
         default=None,
-        help="Output CSV path (default: results/manifest.csv)",
+        help="Output CSV path (default: results/<model>__<input_basename>/manifest.csv)",
     )
     return parser.parse_args()
 
@@ -219,9 +220,6 @@ def build_manifest(pdfs: list[dict], max_pages: int | None = None) -> list[dict]
 
 def main():
     args = parse_args()
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    output_path = Path(args.output) if args.output else RESULTS_DIR / "manifest.csv"
-
     input_str = args.input
 
     # Determine source
@@ -243,6 +241,16 @@ def main():
     print(f"Found {len(pdfs)} PDF files")
     if args.max_pages:
         print(f"Max pages cap: {args.max_pages}")
+
+    # Resolve output path
+    if args.output:
+        output_path = Path(args.output)
+    else:
+        run_dir = make_run_dir(args.model, input_str)
+        run_dir.mkdir(parents=True, exist_ok=True)
+        output_path = run_dir / "manifest.csv"
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Build manifest
     print("Building page manifest (counting pages)...")

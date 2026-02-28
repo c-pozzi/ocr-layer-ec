@@ -38,7 +38,28 @@ CLASSIFICATION_FIELDS = [
 
 VLLM_SERVERS = [f"http://localhost:{8000 + i}" for i in range(4)]
 VLLM_ENDPOINT = "/v1/chat/completions"
-MODEL_NAME = "Qwen/Qwen2.5-VL-7B-Instruct-AWQ"
+
+MODEL_CONFIGS = {
+    "bf16": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "awq": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+}
+
+RESULTS_DIR = SCRIPT_DIR / "results"
+
+
+def make_run_dir(model_key: str, input_path: str | Path) -> Path:
+    """
+    Build per-run results directory: results/<model_key>__<folder_name>
+
+    Args:
+        model_key: Key from MODEL_CONFIGS (e.g. "awq", "bf16")
+        input_path: Path to input folder (basename is used)
+
+    Returns:
+        Path to the run directory (not yet created)
+    """
+    folder_name = Path(input_path).name
+    return RESULTS_DIR / f"{model_key}__{folder_name}"
 
 CLASSIFY_PROMPT = get_classify_prompt()
 
@@ -105,7 +126,7 @@ async def classify_image_async(
     session: aiohttp.ClientSession,
     server_url: str,
     image_b64: str,
-    model_name: str = MODEL_NAME,
+    model_name: str = MODEL_CONFIGS["awq"],
     request_timeout: float = 60.0,
 ) -> tuple[dict, float]:
     """

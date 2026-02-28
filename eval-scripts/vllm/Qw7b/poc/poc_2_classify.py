@@ -6,10 +6,10 @@ and records per-page timing data. Uses producer-consumer pattern with
 async concurrency for GPU throughput optimization.
 
 Usage:
-    python poc_2_classify.py --manifest results/manifest.csv
-    python poc_2_classify.py --manifest results/manifest.csv --concurrency-per-server 8 --resume
+    python poc_2_classify.py --model awq --concurrency-per-server 4
+    python poc_2_classify.py --model awq --resume
 
-Output: results/classification.csv
+Output: results/<model>__<input_folder>/classification.csv
 """
 
 import argparse
@@ -25,7 +25,9 @@ import aiohttp
 
 from poc_utils import (
     VLLM_SERVERS,
-    MODEL_NAME,
+    MODEL_CONFIGS,
+    RESULTS_DIR,
+    make_run_dir,
     render_page_to_base64,
     classify_image_async,
     flatten_classification,
@@ -36,20 +38,28 @@ from poc_utils import (
     ProgressTracker,
 )
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-RESULTS_DIR = SCRIPT_DIR / "results"
-CHECKPOINT_FILE = RESULTS_DIR / ".classify_checkpoint"
-
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Classify pages from manifest with per-page timing"
     )
     parser.add_argument(
+        "--model",
+        choices=list(MODEL_CONFIGS.keys()),
+        default="awq",
+        help="Model variant (default: awq)",
+    )
+    parser.add_argument(
         "--manifest",
         type=str,
-        default=str(RESULTS_DIR / "manifest.csv"),
-        help="Path to manifest CSV (default: results/manifest.csv)",
+        default=None,
+        help="Path to manifest CSV (default: <run_dir>/manifest.csv)",
+    )
+    parser.add_argument(
+        "--instance",
+        type=str,
+        default=None,
+        help="EC2 instance type for metadata (e.g. g5.12xlarge)",
     )
     parser.add_argument(
         "--concurrency-per-server",
@@ -66,7 +76,7 @@ def parse_args():
         "--output",
         type=str,
         default=None,
-        help="Output CSV path (default: results/classification.csv)",
+        help="Output CSV path (default: <run_dir>/classification.csv)",
     )
     parser.add_argument(
         "--queue-size",
@@ -206,6 +216,7 @@ async def consumer(
     progress: ProgressTracker,
     queue_max: int,
     done_event: asyncio.Event,
+    model_name: str = MODEL_CONFIGS["awq"],
 ):
     """
     Pull rendered pages from queue, classify via vLLM, write results.
@@ -256,7 +267,7 @@ async def consumer(
 
         # Classify via vLLM
         classification, classify_time = await classify_image_async(
-            session, server_url, item["image_b64"]
+            session, server_url, item["image_b64"], model_name=model_name
         )
 
         total_time = item["render_time"] + queue_wait + classify_time
@@ -298,22 +309,52 @@ async def consumer(
 async def run_classification(args):
     """Main async orchestrator: producer-consumer pipeline."""
 
-    manifest_path = Path(args.manifest)
+    model_name = MODEL_CONFIGS[args.model]
+
+    # If --manifest not given, we need to find any existing run dir for this model.
+    # We scan RESULTS_DIR for dirs starting with "<model>__" and pick the manifest.
+    if args.manifest:
+        manifest_path = Path(args.manifest)
+    else:
+        # Find matching run dirs
+        pattern = f"{args.model}__*"
+        candidates = sorted(RESULTS_DIR.glob(pattern))
+        if not candidates:
+            print(f"ERROR: No run directory matching '{pattern}' found in {RESULTS_DIR}")
+            print("Run poc_1_manifest.py first to create a manifest.")
+            sys.exit(1)
+        if len(candidates) > 1:
+            print(f"Multiple run dirs found for model '{args.model}':")
+            for c in candidates:
+                print(f"  {c.name}")
+            print("Use --manifest to specify which one.")
+            sys.exit(1)
+        manifest_path = candidates[0] / "manifest.csv"
+
     if not manifest_path.exists():
         print(f"ERROR: Manifest not found: {manifest_path}")
         sys.exit(1)
 
-    output_path = Path(args.output) if args.output else RESULTS_DIR / "classification.csv"
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-
-    # Load manifest
+    # Load manifest to derive run dir
     print(f"Loading manifest: {manifest_path}")
     manifest = load_manifest(str(manifest_path))
     print(f"  Total pages in manifest: {len(manifest)}")
 
+    if not manifest:
+        print("Empty manifest.")
+        sys.exit(1)
+
+    # Derive run dir from model + input folder
+    input_folder = manifest[0]["folder"]
+    run_dir = make_run_dir(args.model, input_folder)
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = Path(args.output) if args.output else run_dir / "classification.csv"
+    checkpoint_file = run_dir / ".classify_checkpoint"
+
     # Filter already-completed pages if resuming
     if args.resume:
-        completed = load_checkpoint(CHECKPOINT_FILE)
+        completed = load_checkpoint(checkpoint_file)
         original_count = len(manifest)
         manifest = [
             p for p in manifest
@@ -322,8 +363,8 @@ async def run_classification(args):
         print(f"  Resuming: {original_count - len(manifest)} already done, {len(manifest)} remaining")
     else:
         # Clear checkpoint for fresh run
-        if CHECKPOINT_FILE.exists():
-            CHECKPOINT_FILE.unlink()
+        if checkpoint_file.exists():
+            checkpoint_file.unlink()
 
     if not manifest:
         print("All pages already classified. Nothing to do.")
@@ -372,10 +413,11 @@ async def run_classification(args):
                     server_url=server_url,
                     session=session,
                     csv_writer=csv_writer,
-                    checkpoint_path=CHECKPOINT_FILE,
+                    checkpoint_path=checkpoint_file,
                     progress=progress,
                     queue_max=queue_size,
                     done_event=done_event,
+                    model_name=model_name,
                 )
             )
             consumer_tasks.append(task)
@@ -406,6 +448,10 @@ async def run_classification(args):
     # Save metadata for the report
     meta_path = output_path.with_suffix(".meta.json")
     meta = {
+        "model": args.model,
+        "model_name": model_name,
+        "input_folder": input_folder,
+        "instance": args.instance,
         "wall_time_sec": round(summary["wall_time_sec"], 2),
         "pages_classified": summary["total_completed"],
         "total_errors": summary["total_errors"],
