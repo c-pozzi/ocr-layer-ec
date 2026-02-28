@@ -1,0 +1,11 @@
+{
+  "wall_time_sec": 5880.3,
+  "pages_classified": 9000,
+  "total_errors": 0,
+  "pages_per_sec": 1.5306,
+  "num_servers": 4,
+  "concurrency_per_server": 4,
+  "total_concurrency": 16,
+  "dpi": 150,
+  "timestamp": "2026-02-28T10:37:00+00:00"
+}
