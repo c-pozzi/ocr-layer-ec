@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EC OCR Pipeline v2 — Tiered Architecture with Classifier Routing</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f9fa; color: #1a1a2e; padding: 40px 20px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+  h2 { font-size: 22px; color: #2d3a8c; margin: 40px 0 16px; }
+  h3 { font-size: 17px; color: #3d5a80; margin: 24px 0 10px; }
+  .subtitle { color: #666; font-style: italic; margin-bottom: 32px; font-size: 15px; }
+  p { line-height: 1.6; margin-bottom: 12px; font-size: 15px; }
+  .diagram-section { background: white; border-radius: 12px; padding: 32px; margin: 24px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  
+  .flow { display: flex; flex-direction: column; gap: 0; align-items: center; padding: 20px 0; }
+  .flow-row { display: flex; align-items: center; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .box {
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 130px;
+    position: relative;
+    line-height: 1.4;
+  }
+  .box small { display: block; font-weight: 400; font-size: 11px; opacity: 0.85; margin-top: 4px; }
+  .box-input { background: #e8f5e9; border: 2px solid #4caf50; color: #2e7d32; }
+  .box-storage { background: #fff3e0; border: 2px solid #ff9800; color: #e65100; }
+  .box-trigger { background: #fce4ec; border: 2px solid #e91e63; color: #ad1457; }
+  .box-compute { background: #e3f2fd; border: 2px solid #2196f3; color: #1565c0; }
+  .box-classify { background: #fff8e1; border: 2px solid #ffc107; color: #f57f17; }
+  .box-queue { background: #f3e5f5; border: 2px solid #9c27b0; color: #6a1b9a; }
+  .box-queue-simple { background: #e8f5e9; border: 2px solid #66bb6a; color: #2e7d32; }
+  .box-queue-complex { background: #fce4ec; border: 2px solid #ef5350; color: #c62828; }
+  .box-output { background: #e0f2f1; border: 2px solid #009688; color: #00695c; }
+  .box-monitor { background: #fafafa; border: 2px solid #9e9e9e; color: #424242; }
+  .box-gpu-light { background: #e8f5e9; border: 2px solid #4caf50; color: #2e7d32; }
+  .box-gpu-heavy { background: #ffebee; border: 2px solid #ef5350; color: #c62828; }
+  
+  .arrow-down { font-size: 24px; color: #999; padding: 6px 0; text-align: center; }
+  .arrow-right { font-size: 22px; color: #999; }
+  .arrow-split { font-size: 14px; color: #999; text-align: center; padding: 4px 0; }
+  
+  .note {
+    background: #fffde7;
+    border-left: 4px solid #ffc107;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 13px;
+    border-radius: 0 8px 8px 0;
+    line-height: 1.5;
+  }
+  .note strong { color: #f57f17; }
+  .note-blue {
+    background: #e8eaf6;
+    border-left: 4px solid #3f51b5;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 13px;
+    border-radius: 0 8px 8px 0;
+    line-height: 1.5;
+  }
+  .note-blue strong { color: #283593; }
+  
+  .step-detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .step-card {
+    background: #f5f7ff;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #e0e4f0;
+  }
+  .step-card h4 { font-size: 14px; color: #2d3a8c; margin-bottom: 8px; }
+  .step-card p { font-size: 13px; margin-bottom: 6px; }
+  .step-card code {
+    background: #e8ecf8;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .tier-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .tier-table th {
+    background: #2d3a8c;
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+  }
+  .tier-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e0e4f0;
+  }
+  .tier-table tr:nth-child(even) { background: #f5f7ff; }
+  .tier-simple { border-left: 4px solid #4caf50; }
+  .tier-complex { border-left: 4px solid #ef5350; }
+  
+  .phase-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #999;
+    font-weight: 700;
+    margin: 16px 0 8px;
+    text-align: center;
+  }
+  
+  .split-container {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    justify-content: center;
+    margin: 16px 0;
+  }
+  .split-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    max-width: 340px;
+  }
+  .branch-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+  .label-simple { background: #e8f5e9; color: #2e7d32; }
+  .label-complex { background: #ffebee; color: #c62828; }
+  
+  .cost-box {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border: 2px solid #66bb6a;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .cost-box h4 { color: #2e7d32; margin-bottom: 10px; }
+  .cost-box p { font-size: 13px; }
+  
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+  .code-block .comment { color: #6c7086; }
+  .code-block .string { color: #a6e3a1; }
+  .code-block .keyword { color: #cba6f7; }
+  .code-block .func { color: #89b4fa; }
+  .code-block .arrow-code { color: #f9e2af; }
+
+  @media (max-width: 700px) {
+    .step-detail { grid-template-columns: 1fr; }
+    .flow-row { flex-direction: column; }
+    .split-container { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>EC OCR Pipeline v2 — Tiered Architecture</h1>
+<p class="subtitle">Classifier-routed processing with Qwen 7B Q4 for page classification, then tiered GPU workers for OCR.</p>
+
+<!-- ============ DIAGRAM 1: HIGH LEVEL ============ -->
+<div class="diagram-section">
+<h2>1. Architecture Overview</h2>
+<p>The key insight: use a cheap classifier pass on each page to decide the processing tier. Most pages are straightforward (single column, typed text, clean scan) and go through the fast path. Complex pages (tables, multi-column, handwritten, blurry) route to bigger instances with specialized prompts or few-shot examples.</p>
+
+<div class="flow">
+  <div class="phase-label">Upload &amp; Queue</div>
+  <div class="flow-row">
+    <div class="box box-input">📄 Documents<small>PDF / scanned</small></div>
+    <span class="arrow-right">→</span>
+    <div class="box box-storage">🪣 S3 Input<small>s3://ec-ocr/incoming/</small></div>
+    <span class="arrow-right">→</span>
+    <div class="box box-trigger">⏰ EventBridge<small>+ Lambda orchestrator</small></div>
+    <span class="arrow-right">→</span>
+    <div class="box box-queue">📋 SQS Raw Queue<small>One message per doc</small></div>
+  </div>
+  
+  <div class="arrow-down">↓</div>
+  <div class="phase-label">Classify (per page)</div>
+  
+  <div class="flow-row">
+    <div class="box box-classify">🔍 Classifier Worker<small>Qwen 7B Q4 on g5.xlarge<br>1× A10G (24GB)</small></div>
+  </div>
+  <p style="font-size:12px; color:#888; text-align:center; margin-top:4px;">
+    Downloads PDF → extracts pages → runs classify prompt per page → outputs JSON tags<br>
+    <code style="font-size:11px;">{"multi_column": false, "has_tables": true, "handwritten": false, "poor_quality": false}</code>
+  </p>
+  
+  <div class="arrow-down">↓ routes each page to the right queue</div>
+  
+  <div class="split-container">
+    <div class="split-branch">
+      <span class="branch-label label-simple">~70-80% of pages</span>
+      <div class="box box-queue-simple" style="width:100%;">📋 SQS Simple Queue<small>Standard pages</small></div>
+      <div class="arrow-down">↓</div>
+      <div class="box box-gpu-light" style="width:100%;">🖥️ Tier 1 Workers<small>Qwen 7B FP16<br>g5.xlarge · 1× A10G<br>Standard prompt</small></div>
+    </div>
+    
+    <div class="split-branch">
+      <span class="branch-label label-complex">~20-30% of pages</span>
+      <div class="box box-queue-complex" style="width:100%;">📋 SQS Complex Queue<small>Tables, handwritten, blurry</small></div>
+      <div class="arrow-down">↓</div>
+      <div class="box box-gpu-heavy" style="width:100%;">🖥️ Tier 2 Workers<small>Qwen 72B FP16 + few-shot<br>p4d.24xlarge · 8× A100 40GB<br>Tensor parallelism<br>Specialized prompts</small></div>
+    </div>
+  </div>
+  
+  <div class="arrow-down">↓</div>
+  <div class="phase-label">Output &amp; Reassemble</div>
+  
+  <div class="flow-row">
+    <div class="box box-output">🧩 Assembler Lambda<small>Combines page results<br>into full document</small></div>
+    <span class="arrow-right">→</span>
+    <div class="box box-output">🪣 S3 Output<small>s3://ec-ocr/results/</small></div>
+  </div>
+</div>
+</div>
+
+<!-- ============ CLASSIFIER DETAIL ============ -->
+<div class="diagram-section">
+<h2>2. The Classifier Stage</h2>
+<p>A small quantized Qwen runs a short classification prompt on each page before any heavy OCR processing happens.</p>
+
+<div class="step-detail">
+  <div class="step-card">
+    <h4>What the classifier detects</h4>
+    <p>• <code>multi_column</code> — two or more text columns</p>
+    <p>• <code>has_tables</code> — structured tables with rows/cols</p>
+    <p>• <code>handwritten</code> — handwritten text or annotations</p>
+    <p>• <code>poor_quality</code> — blur, fading, stains</p>
+    <p>• <code>has_stamps</code> — official stamps or seals</p>
+    <p>• <code>has_forms</code> — form fields to fill</p>
+    <p>• <code>language</code> — if not in metadata already</p>
+  </div>
+  
+  <div class="step-card">
+    <h4>Routing rules</h4>
+    <p><strong>Tier 1 (simple):</strong> none of the complex flags set</p>
+    <p><strong>Tier 2 (complex):</strong> any of these are true:</p>
+    <p>• <code>has_tables == true</code></p>
+    <p>• <code>handwritten == true</code></p>
+    <p>• <code>poor_quality == true</code></p>
+    <p>• <code>multi_column == true</code> AND <code>has_tables == true</code></p>
+    <p style="margin-top:8px;"><strong>The routing logic is just a function</strong> — easy to tune thresholds and rules without changing any infrastructure.</p>
+  </div>
+</div>
+
+<div class="code-block">
+<span class="comment"># Classifier prompt — minimal, ~50 tokens input</span><br>
+CLASSIFY_PROMPT = <span class="string">"""Output JSON only, no explanation:<br>
+{"multi_column": bool, "has_tables": bool, "handwritten": bool,<br>
+ "poor_quality": bool, "has_stamps": bool, "has_forms": bool}"""</span><br>
+<br>
+<span class="comment"># Routing function</span><br>
+<span class="keyword">def</span> <span class="func">route_page</span>(classification: dict) <span class="arrow-code">-></span> str:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> classification[<span class="string">"has_tables"</span>]:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"complex"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> classification[<span class="string">"handwritten"</span>]:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"complex"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> classification[<span class="string">"poor_quality"</span>]:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"complex"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"simple"</span><br>
+<br>
+<span class="comment"># Prompt selection based on classification</span><br>
+<span class="keyword">def</span> <span class="func">select_prompt</span>(classification: dict) <span class="arrow-code">-></span> str:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> classification[<span class="string">"has_tables"</span>]:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> TABLE_OCR_PROMPT <span class="comment"># includes few-shot table examples</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> classification[<span class="string">"handwritten"</span>]:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> HANDWRITTEN_OCR_PROMPT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> classification[<span class="string">"poor_quality"</span>]:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> ENHANCED_OCR_PROMPT <span class="comment"># "try harder" instructions</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> STANDARD_OCR_PROMPT
+</div>
+
+<div class="note">
+  <strong>Why per-page, not per-document?</strong> A single document can have page 1 as clean typed text, page 5 as a table, and page 12 as a handwritten annotation. Per-page routing ensures each page gets the right treatment.
+</div>
+</div>
+
+<!-- ============ TIER COMPARISON ============ -->
+<div class="diagram-section">
+<h2>3. Tier Comparison</h2>
+
+<table class="tier-table">
+  <tr>
+    <th></th>
+    <th>Tier 1 — Simple</th>
+    <th>Tier 2 — Complex</th>
+  </tr>
+  <tr>
+    <td><strong>Model</strong></td>
+    <td class="tier-simple">Qwen 7B FP16</td>
+    <td class="tier-complex">Qwen 72B FP16 + few-shot</td>
+  </tr>
+  <tr>
+    <td><strong>Instance</strong></td>
+    <td class="tier-simple">g5.xlarge<br>1× A10G (24GB)</td>
+    <td class="tier-complex">p4d.24xlarge<br>8× A100 40GB (320GB total)<br>Tensor parallelism</td>
+  </tr>
+  <tr>
+    <td><strong>Context length</strong></td>
+    <td class="tier-simple">Short prompt, ~200-500 tokens</td>
+    <td class="tier-complex">Few-shot examples, ~2000-4000 tokens</td>
+  </tr>
+  <tr>
+    <td><strong>Speed per page</strong></td>
+    <td class="tier-simple">~1.4 sec (benchmarked)</td>
+    <td class="tier-complex">~3-8 sec (72B with tensor parallelism)</td>
+  </tr>
+  <tr>
+    <td><strong>Spot cost/hr</strong></td>
+    <td class="tier-simple">~$0.50/hr</td>
+    <td class="tier-complex">~$16/hr (Spot) to ~$32.77/hr (On-Demand)</td>
+  </tr>
+  <tr>
+    <td><strong>Volume</strong></td>
+    <td class="tier-simple">~70-80% of pages</td>
+    <td class="tier-complex">~20-30% of pages</td>
+  </tr>
+  <tr>
+    <td><strong>Prompt</strong></td>
+    <td class="tier-simple">Standard OCR prompt</td>
+    <td class="tier-complex">Specialized per classification<br>(table prompt, handwriting prompt, etc.)</td>
+  </tr>
+</table>
+
+<div class="note-blue">
+  <strong>Instance sizing for Tier 2:</strong> Qwen 72B in FP16 requires ~144GB VRAM for weights alone. With KV cache for few-shot examples (2-4 image-text pairs at 2000-4000 tokens), total VRAM can reach 200GB+. The p4d.24xlarge provides 320GB across 8× A100 40GB GPUs with NVLink, giving ample headroom for tensor parallelism and large batch sizes.
+</div>
+</div>
+
+<!-- ============ PROCESSING FLOW DETAIL ============ -->
+<div class="diagram-section">
+<h2>4. Detailed Processing Flow</h2>
+
+<div class="step-detail">
+  <div class="step-card">
+    <h4>Step 1: Orchestrator Lambda (22:00 UTC)</h4>
+    <p>Scans <code>s3://ec-ocr/incoming/</code> for new PDFs.</p>
+    <p>Sends one SQS message per document to the <strong>Raw Queue</strong>.</p>
+    <p>Requests classifier instances via AWS Batch.</p>
+  </div>
+  
+  <div class="step-card">
+    <h4>Step 2: Classifier Worker</h4>
+    <p>Pulls doc from Raw Queue → downloads PDF from S3.</p>
+    <p>Extracts all pages as images.</p>
+    <p>Runs Qwen 7B Q4 classify prompt on each page.</p>
+    <p>For each page, writes classification JSON to S3 and sends to the appropriate tier queue (simple or complex) with the page S3 path + selected prompt.</p>
+  </div>
+  
+  <div class="step-card">
+    <h4>Step 3a: Tier 1 Workers</h4>
+    <p>Pull from Simple Queue.</p>
+    <p>Download page image from S3.</p>
+    <p>Run Qwen 7B FP16 with standard OCR prompt.</p>
+    <p>Write page result to <code>s3://ec-ocr/results/{doc_id}/page_{n}.json</code></p>
+    <p>Fast, cheap, handles the bulk of the work.</p>
+  </div>
+  
+  <div class="step-card">
+    <h4>Step 3b: Tier 2 Workers</h4>
+    <p>Pull from Complex Queue.</p>
+    <p>Download page image + few-shot examples from S3.</p>
+    <p>Run Qwen 72B FP16 with tensor parallelism across 8× A100 GPUs, using specialized prompts.</p>
+    <p>Write page result to same path structure.</p>
+    <p>Slower, more expensive, but better quality on hard pages.</p>
+  </div>
+  
+  <div class="step-card">
+    <h4>Step 4: Assembler</h4>
+    <p>When all pages for a document are done (tracked in DynamoDB), an Assembler Lambda fires.</p>
+    <p>Collects all page JSONs → combines into full document result.</p>
+    <p>Writes final output to <code>s3://ec-ocr/results/{doc_id}/full.json</code></p>
+    <p>Updates DynamoDB status to <code>completed</code>.</p>
+  </div>
+  
+  <div class="step-card">
+    <h4>Step 5: Shutdown</h4>
+    <p>Tier 1 workers shut down when Simple Queue is empty for N minutes.</p>
+    <p>Tier 2 workers shut down when Complex Queue is empty.</p>
+    <p>Classifier shuts down when Raw Queue is empty.</p>
+    <p>Everything scales to zero. Cost = $0 when idle.</p>
+  </div>
+</div>
+</div>
+
+<!-- ============ ARCHITECTURE DECISION ============ -->
+<div class="diagram-section">
+<h2>5. Key Design Decision: Where Does the Classifier Run?</h2>
+<p>Three options for where to run the Q4 classifier:</p>
+
+<table class="tier-table">
+  <tr>
+    <th>Option</th>
+    <th>How it works</th>
+    <th>Pros</th>
+    <th>Cons</th>
+  </tr>
+  <tr>
+    <td><strong>A. Separate classifier instance</strong></td>
+    <td>Dedicated g5.xlarge runs only Q4 classifier. Routes pages to tier queues.</td>
+    <td>Clean separation. Classifier can process all docs fast before OCR starts.</td>
+    <td>Extra instance cost. Extra S3 round-trips.</td>
+  </tr>
+  <tr>
+    <td><strong>B. Co-located on Tier 1 workers</strong></td>
+    <td>Each Tier 1 worker loads both Q4 and FP16 models. Classifies then OCRs simple pages locally, only sends complex pages to Tier 2 queue.</td>
+    <td>Fewer instances. No extra S3 round-trip for simple pages (~80%). Both models fit in 24GB (Q4 ~4GB + FP16 ~14GB = ~18GB).</td>
+    <td>More complex worker code. Less VRAM headroom for batching.</td>
+  </tr>
+  <tr>
+    <td><strong>C. CPU-based pre-filter + Q4 on GPU</strong></td>
+    <td>Use CV2 blur detection and layout heuristics on Lambda (CPU). Only ambiguous cases go to Q4 classifier.</td>
+    <td>Cheapest. Many features detectable without VLM.</td>
+    <td>Less accurate routing. Two-system maintenance.</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>Recommended: Option B.</strong> The classifier (Qwen 7B Q4, ~4GB) and the Tier 1 OCR model (Qwen 7B FP16, ~14GB) both fit on a single A10G (~18GB total, tested). This means 70-80% of pages are classified and processed on the same machine with no extra network hop. Only complex pages (20-30%) are routed via SQS to the Tier 2 p4d.24xlarge running 72B.
+</div>
+</div>
+
+<div class="diagram-section">
+<h2>6. AWS GPU Pricing Models</h2>
+
+<table class="tier-table">
+  <tr>
+    <th>Pricing Model</th>
+    <th>How It Works</th>
+    <th>Discount vs On-Demand</th>
+    <th>Risk / Tradeoff</th>
+  </tr>
+  <tr>
+    <td><strong>On-Demand</strong></td>
+    <td>Pay per hour, no commitment. Start and stop anytime.</td>
+    <td>0% (baseline price)</td>
+    <td>None. Always available, but most expensive.</td>
+  </tr>
+  <tr>
+    <td><strong>Spot</strong></td>
+    <td>Bid for unused AWS capacity. AWS can reclaim instances with 2-minute warning.</td>
+    <td>Up to 60-90% for common instances. For high-demand GPU instances (p4d), realistic discount is 40-60%.</td>
+    <td>Interruption risk. Not guaranteed to be available. Works well for batch workloads with SQS retry — if a worker is reclaimed, the message reappears in the queue.</td>
+  </tr>
+  <tr>
+    <td><strong>Reserved (1yr / 3yr)</strong></td>
+    <td>Commit to a fixed instance type for 1 or 3 years. Pay upfront or monthly.</td>
+    <td>30-60% depending on term and payment option</td>
+    <td>Lock-in. Must pay whether the instance is used or not. Only makes sense for always-on workloads, not batch.</td>
+  </tr>
+  <tr>
+    <td><strong>Savings Plans</strong></td>
+    <td>Commit to a $/hr spend (not a specific instance type). Flexible across instance families.</td>
+    <td>~30-50%</td>
+    <td>More flexible than Reserved, but still a commitment. Better if workload might change instance types.</td>
+  </tr>
+  <tr>
+    <td><strong>Capacity Blocks</strong></td>
+    <td>Reserve GPU instances for a defined time window (e.g., 3 hours daily). Relatively new AWS offering for ML workloads.</td>
+    <td>Varies, but guaranteed availability at a known price</td>
+    <td>Must plan schedule in advance. Good fit for predictable batch jobs like this pipeline.</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>Recommendation for this pipeline:</strong> Tier 1 (g5.xlarge) works well on Spot — these are widely available and cheap. Tier 2 (p4d.24xlarge) is harder to get on Spot due to high demand. Options: (1) Use Spot with on-demand fallback — try Spot first, fall back to on-demand if unavailable. (2) Use Capacity Blocks if the batch schedule is predictable (e.g., every night at 22:00 for ~3 hours). (3) For sustained daily usage, a Savings Plan may be more cost-effective than pure on-demand.
+</div>
+
+<h3>p4d.24xlarge Reference Pricing</h3>
+<table class="tier-table">
+  <tr>
+    <th>Model</th>
+    <th>Price/Hour</th>
+    <th>~3 hrs/day</th>
+    <th>Monthly (30 days)</th>
+  </tr>
+  <tr>
+    <td>On-Demand</td>
+    <td>~$32.77</td>
+    <td>~$98/day</td>
+    <td>~$2,950</td>
+  </tr>
+  <tr>
+    <td>Spot (estimated 50% discount)</td>
+    <td>~$16</td>
+    <td>~$48/day</td>
+    <td>~$1,450</td>
+  </tr>
+  <tr>
+    <td>Capacity Blocks (estimated)</td>
+    <td>~$20-25</td>
+    <td>~$65/day</td>
+    <td>~$1,950</td>
+  </tr>
+  <tr>
+    <td>Always-on On-Demand (24/7)</td>
+    <td>~$32.77</td>
+    <td>—</td>
+    <td>~$23,900</td>
+  </tr>
+</table>
+
+<div class="note-blue">
+  <strong>The batch scale-to-zero pattern is critical here.</strong> Running p4d.24xlarge for ~3 hours/day instead of 24/7 reduces monthly cost from ~$23,900 to ~$1,450-2,950 depending on pricing model. This is why the architecture is designed around queues and auto-shutdown.
+</div>
+</div>
+
+<!-- ============ COST ============ -->
+<div class="diagram-section">
+<h2>7. Cost Estimate (Tiered)</h2>
+
+<div class="cost-box">
+  <h4>Daily Load: ~300 docs × ~30 pages = ~9,000 pages</h4>
+  <p><strong>Classification pass:</strong> ~0.3 sec/page × 9,000 = ~45 min GPU time (if separate) — included in Tier 1 if co-located</p>
+  <p style="margin-top:10px;"><strong>Tier 1 (simple, ~7,000 pages):</strong></p>
+  <p>7,000 pages × 1.4 sec = ~2.7 hrs GPU time</p>
+  <p>g5.xlarge Spot: 2.7 hrs × $0.50 = <strong>$1.35/day</strong></p>
+  <p style="margin-top:10px;"><strong>Tier 2 (complex, ~2,000 pages):</strong></p>
+  <p>With 72B FP16 on p4d.24xlarge: 2,000 pages × 5 sec = ~2.8 hrs</p>
+  <p>p4d.24xlarge On-Demand: 2.8 hrs × $32.77 = <strong>~$92/day</strong></p>
+  <p>p4d.24xlarge Spot (~50% off): 2.8 hrs × $16 = <strong>~$45/day</strong></p>
+  <p style="margin-top:12px; font-weight:600; font-size: 15px;">
+    Monthly estimate: ~$1,400/month (Spot) to ~$2,800/month (On-Demand) for Tier 1 + Tier 2
+  </p>
+  <p style="margin-top:4px; font-size: 13px;">Plus ~$10-20/month for S3, SQS, Lambda, DynamoDB</p>
+</div>
+
+<div class="note">
+  <strong>The tiered approach saves money:</strong> the p4d.24xlarge is only needed for 20-30% of pages and only runs for ~3 hours/day. Compared to running p4d.24xlarge 24/7 (~$23,900/month), the tiered batch approach at ~$1,400-2,800/month is a 88-94% saving. Scale-to-zero is what makes GPU-heavy pipelines financially viable.
+</div>
+</div>
+
+<!-- ============ DOCKER ============ -->
+<div class="diagram-section">
+<h2>8. Docker Image Strategy</h2>
+
+<div class="step-detail">
+  <div class="step-card">
+    <h4>Tier 1 Image (co-located classifier)</h4>
+    <p><code>ec-ocr-tier1:latest</code></p>
+    <p>Contains: vLLM + Qwen 7B Q4 weights + Qwen 7B FP16 weights</p>
+    <p>Image size: ~25GB</p>
+    <p>Startup: loads both models into VRAM (~18GB)</p>
+    <p>Worker logic: classify → route or OCR locally</p>
+  </div>
+  
+  <div class="step-card">
+    <h4>Tier 2 Image</h4>
+    <p><code>ec-ocr-tier2:latest</code></p>
+    <p>Contains: vLLM + Qwen 72B FP16 weights + few-shot example bank</p>
+    <p>Image size: ~150GB (72B weights are large)</p>
+    <p>Startup: loads model sharded across 8× A100 with tensor parallelism</p>
+    <p>Worker logic: pull from Complex Queue, run specialized prompt</p>
+  </div>
+</div>
+
+<div class="note-blue">
+  <strong>Few-shot example bank:</strong> Store few-shot examples (image + expected output pairs) in S3: <code>s3://ec-ocr/few-shot/tables/</code>, <code>s3://ec-ocr/few-shot/handwritten/</code>, etc. Workers download them at startup. This allows updating examples without rebuilding the Docker image.
+</div>
+</div>
+
+<!-- ============ SQS MESSAGE FORMAT ============ -->
+<div class="diagram-section">
+<h2>9. SQS Message Formats</h2>
+
+<div class="code-block">
+<span class="comment"># Raw Queue message (doc level)</span><br>
+{<br>
+&nbsp;&nbsp;<span class="string">"doc_id"</span>: <span class="string">"EU-2024-0847"</span>,<br>
+&nbsp;&nbsp;<span class="string">"s3_path"</span>: <span class="string">"s3://ec-ocr/incoming/2025-02-21/EU-2024-0847.pdf"</span>,<br>
+&nbsp;&nbsp;<span class="string">"total_pages"</span>: 34,<br>
+&nbsp;&nbsp;<span class="string">"metadata"</span>: {<span class="string">"language"</span>: <span class="string">"fr"</span>, <span class="string">"source"</span>: <span class="string">"council_archive"</span>}<br>
+}<br>
+<br>
+<span class="comment"># Simple/Complex Queue message (page level)</span><br>
+{<br>
+&nbsp;&nbsp;<span class="string">"doc_id"</span>: <span class="string">"EU-2024-0847"</span>,<br>
+&nbsp;&nbsp;<span class="string">"page_num"</span>: 5,<br>
+&nbsp;&nbsp;<span class="string">"page_s3"</span>: <span class="string">"s3://ec-ocr/pages/EU-2024-0847/page_005.png"</span>,<br>
+&nbsp;&nbsp;<span class="string">"classification"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"multi_column"</span>: <span class="keyword">false</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"has_tables"</span>: <span class="keyword">true</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"handwritten"</span>: <span class="keyword">false</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"poor_quality"</span>: <span class="keyword">false</span><br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;<span class="string">"prompt_id"</span>: <span class="string">"table_ocr_v2"</span>,<br>
+&nbsp;&nbsp;<span class="string">"tier"</span>: <span class="string">"complex"</span><br>
+}
+</div>
+</div>
+
+</div>
+</body>
+</html>
