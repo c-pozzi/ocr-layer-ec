@@ -48,12 +48,12 @@ INPUT_DIR = SCRIPT_DIR.parents[2] / "ocr-evaluation-samples"
 OUTPUT_DIR = SCRIPT_DIR / "results_classify"
 
 # vLLM server configuration
-VLLM_SERVERS = [f"http://localhost:{8000 + i}" for i in range(8)]
+VLLM_SERVERS = [f"http://localhost:{8000 + i}" for i in range(4)]
 VLLM_ENDPOINT = "/v1/chat/completions"
 MODEL_NAME = MODEL_CONFIGS["bf16"]  # overridden in main() based on --model arg
 
 # Concurrency
-MAX_CONCURRENCY = 8
+MAX_CONCURRENCY = 4
 
 # =============================================================================
 # PDF PROCESSING

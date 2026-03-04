@@ -42,6 +42,7 @@ VLLM_ENDPOINT = "/v1/chat/completions"
 MODEL_CONFIGS = {
     "bf16": "Qwen/Qwen2.5-VL-7B-Instruct",
     "awq": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+    "72b-awq": "Qwen/Qwen2.5-VL-72B-Instruct-AWQ",
 }
 
 RESULTS_DIR = SCRIPT_DIR / "results"
@@ -174,6 +175,62 @@ async def classify_image_async(
         return {"error": "Request timeout"}, time.monotonic() - t0
     except Exception as e:
         return {"error": str(e)}, time.monotonic() - t0
+
+
+async def ocr_image_async(
+    session: aiohttp.ClientSession,
+    server_url: str,
+    image_b64: str,
+    prompt: str,
+    model_name: str = MODEL_CONFIGS["awq"],
+    max_tokens: int = 4096,
+    request_timeout: float = 120.0,
+) -> tuple[str, float]:
+    """
+    Send a single image to vLLM for OCR transcription.
+
+    Returns:
+        (ocr_text, inference_time_sec) — raw text on success,
+        or ("ERROR: <message>", elapsed) on failure.
+    """
+    payload = {
+        "model": model_name,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/png;base64,{image_b64}"},
+                    },
+                    {"type": "text", "text": prompt},
+                ],
+            }
+        ],
+        "max_tokens": max_tokens,
+        "temperature": 0.0,
+    }
+
+    t0 = time.monotonic()
+    try:
+        async with session.post(
+            f"{server_url}{VLLM_ENDPOINT}",
+            json=payload,
+            timeout=aiohttp.ClientTimeout(total=request_timeout),
+        ) as response:
+            elapsed = time.monotonic() - t0
+            if response.status != 200:
+                error_text = await response.text()
+                return f"ERROR: HTTP {response.status}: {error_text}", elapsed
+
+            result = await response.json()
+            content = result["choices"][0]["message"]["content"]
+            return content, elapsed
+
+    except asyncio.TimeoutError:
+        return "ERROR: Request timeout", time.monotonic() - t0
+    except Exception as e:
+        return f"ERROR: {e}", time.monotonic() - t0
 
 
 # =============================================================================
