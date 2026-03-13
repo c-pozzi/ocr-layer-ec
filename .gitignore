@@ -67,8 +67,9 @@ archive/
 ocr-input/
 
 # Large binary files in evaluation samples
-ocr-evaluation-samples/*.tif
-ocr-evaluation-samples/*.pdf
+ocr-evaluation-samples/**/*.tif
+ocr-evaluation-samples/**/*.pdf
+ocr-evaluation-samples/**/*.xlsx
 
 # Claude Code internal
 .claude/
@@ -82,6 +83,9 @@ ocr-evaluation-samples/*.pdf
 .profile
 .sudo_as_admin_successful
 .wget-hsts
+
+# AWS credentials
+.aws/
 
 # SSH / GPG
 .ssh/
