@@ -8,44 +8,57 @@ Benchmarking OCR quality on historical European Commission documents (BAC/INV se
 
 ```
 ~/
-├── ocr-evaluation-samples/          # INPUT ONLY — 31 document triplets
+├── ocr-evaluation-samples/          # INPUT ONLY — document triplets
 │   ├── <doc_id>.pdf                 # Scanned document PDFs with embedded OCR layer
 │   ├── <doc_id>.tif                 # High-resolution TIFF scans (~2500x3500px)
 │   ├── <doc_id>_ground_truth.txt    # Human-annotated reference text
-│   ├── metadata.xlsx                # Document metadata
-│   └── check_tif_def.py             # TIF/PDF resolution inspector utility
+│   ├── 20260216_OCR_files/          # Second batch (49 docs, nested subdir)
+│   └── metadata.xlsx                # Document metadata
 │
 ├── eval-scripts/                    # All evaluation scripts and results
 │   ├── vllm/
-│   │   ├── Qw7b/                    # Qwen2.5-VL-7B-Instruct scripts
+│   │   ├── Qw7b/                    # Qwen2.5-VL-7B-Instruct scripts (original evals)
 │   │   │   ├── ocr-eval-vllm.py        # Main eval: PDF OCR vs Qwen vs ground truth
 │   │   │   ├── ocr-eval-vllm-tif.py    # Full-resolution TIF variant
-│   │   │   ├── ocr-eval-vllm-old.py    # Older version
-│   │   │   ├── prompts.py              # Modular prompt system (classify-then-OCR)
-│   │   │   ├── classify_prompts.py      # Document classification (multi-col, tables, etc.)
-│   │   │   ├── ocr_pipeline.py          # Classification-based OCR pipeline
-│   │   │   ├── benchmark_batching.py    # Throughput benchmarking
-│   │   │   ├── start_vllm_servers.sh    # Launch 4 vLLM servers (1 per GPU, ports 8000-8003)
-│   │   │   ├── start_vllm_servers_rc.sh
-│   │   │   ├── start_vlllm_servers_nvidia.sh
+│   │   │   ├── classify_prompts.py      # Document classification (legacy)
+│   │   │   ├── ocr_pipeline.py          # Classification-based OCR pipeline (legacy)
+│   │   │   ├── start_vllm_servers.sh    # Launch 4x 7B bf16 servers
 │   │   │   ├── results/                 # Qwen 7B results (150dpi PDF)
-│   │   │   ├── results_fullres/         # Qwen 7B results (full-res TIF, no downscaling)
-│   │   │   ├── results_failed_run/      # Dead run (servers down, all CER=1.0)
-│   │   │   ├── results_classify/        # Results from classification-based prompt pipeline
+│   │   │   ├── results_fullres/         # Qwen 7B results (full-res TIF)
 │   │   │   └── api/
-│   │   │       └── ocr_comparison_app.py  # Streamlit diff viewer
-│   │   └── Qw72b/                   # Qwen2.5-VL-72B-Instruct scripts
-│   │       ├── ocr-eval-vllm.py         # 72B eval (tensor parallelism, 8 GPUs)
-│   │       ├── start_vllm_72.sh         # Launch 72B server (all 8 GPUs)
-│   │       ├── results/                 # Qwen 72B results
-│   │       └── api/
-│   │           └── ocr_comparison_app.py
-│   └── max/                         # Modular MAX serve variant
-│       ├── ocr-eval-max.py              # Same pipeline but targets MAX serve
-│       └── start_max_7b.sh             # Launch MAX server (single GPU)
+│   │   │       └── ocr_comparison_app.py  # Streamlit diff viewer (old)
+│   │   │
+│   │   ├── Qw72b/                   # Qwen2.5-VL-72B-Instruct scripts (original evals)
+│   │   │   ├── ocr-eval-vllm.py
+│   │   │   ├── start_vllm_72.sh
+│   │   │   └── results/
+│   │   │
+│   │   └── poc/                     # ** ACTIVE ** Multi-model POC pipeline
+│   │       ├── prompts.py               # Shared prompt system (classify + OCR blocks + versioning)
+│   │       ├── poc_utils.py             # Shared utils (rendering, vLLM client, classification)
+│   │       ├── poc_1_manifest.py        # Phase 1: build page manifest from PDFs
+│   │       ├── poc_2_classify.py        # Phase 2: classify pages (async, producer-consumer)
+│   │       ├── poc_3_ocr.py             # Phase 3: two-tier OCR (simple/complex routing)
+│   │       ├── run_20260216.py          # Quick pipeline for 20260216 dataset
+│   │       ├── compare_app.py           # Streamlit: AI OCR vs legacy PDF text vs ground truth
+│   │       ├── start_vllm_32b_awq.sh    # Launch 2x 32B AWQ servers (TP=2, ports 8000-8001)
+│   │       ├── start_vllm_72b_awq.sh    # Launch 72B AWQ server
+│   │       └── results/
+│   │           ├── awq__BAC-0002-1971/          # 7B AWQ, first batch
+│   │           ├── 32b-awq__BAC-0002-1971/      # 32B AWQ, first batch
+│   │           ├── awq-lite__BAC-0002-1971/     # 7B lite classifier, first batch
+│   │           └── 20260216/                     # Second batch results
+│   │               ├── classification.csv            # Lite classifier output
+│   │               ├── ocr_simple_v1/                # 7B AWQ, prompt v1
+│   │               ├── ocr_complex_v1/               # 32B AWQ, prompt v1
+│   │               └── ocr_complex_v2/               # 32B AWQ, prompt v2
+│   │
+│   └── max/                         # Modular MAX serve variant (future)
+│       ├── ocr-eval-max.py
+│       └── start_max_7b.sh
 │
 ├── ocr-input/                       # Additional document folders (BAC/INV series, not in git)
-└── archive/                         # Archived experiments (deepseek-ocr-vllm, not in git)
+└── archive/                         # Archived experiments (not in git)
 ```
 
 ## Document Naming Convention
@@ -63,16 +76,65 @@ Benchmarking OCR quality on historical European Commission documents (BAC/INV se
 | Qwen 72B (8-GPU TP) | ~3.5% | ~0.8% | `eval-scripts/vllm/Qw72b/results/` |
 | PDF embedded OCR layer | ~12.2% | ~6.7% | Baseline from existing PDFs |
 
-All AI model configs consistently beat PDF OCR layers (30/31 documents better, except INV-0013-2019-0926_0047 which is a difficult multi-page table document).
+## Two-Tier OCR Pipeline (POC)
 
-## Evaluation Pipeline
+The active pipeline in `eval-scripts/vllm/poc/` uses a classify-then-OCR approach:
 
-1. **Input**: PDF/TIF + ground truth pairs from `ocr-evaluation-samples/`
-2. **PDF OCR extraction**: PyMuPDF (`fitz`) or pdfplumber to extract embedded text layer
-3. **Image preparation**: PDF->image via `pdf2image` at configurable DPI, or native TIF
-4. **VLM inference**: Images sent as base64 to vLLM/MAX OpenAI-compatible API
-5. **CER calculation**: `jiwer` or `python-Levenshtein` on normalized text
-6. **Output**: CSV results, per-document OCR text (raw + normalized), summary stats — written alongside each script in `eval-scripts/`
+1. **Classify** (lite profile): Detect 4 features — `multi_column`, `has_tables`, `poor_quality`, `latin_script`
+2. **Route**: Simple pages → 7B AWQ (fast), Complex pages → 32B/72B AWQ (quality)
+3. **OCR**: Modular prompts assembled from classification flags
+4. **Compare**: Streamlit app for side-by-side inspection
+
+### Complexity Routing (`is_complex`)
+
+A page is complex if any of:
+- `has_tables` is True
+- `handwritten` is True
+- `poor_quality` is True
+- `latin_script` is False (non-Latin scripts like Greek, Arabic)
+
+### Prompt Versioning
+
+Prompts are versioned in `prompts.py` via `PROMPT_VERSIONS` dict. Each version can override base prompt, individual blocks, or the entire build function. Output goes to versioned directories (e.g., `ocr_simple_v1/`, `ocr_complex_v2/`).
+
+- **v1**: Original prompts with all annotation tags and modular blocks
+- **v2**: Updated TABLE_BLOCK with sparse form handling (skip empty columns)
+
+### Running the POC Pipeline (20260216 dataset)
+
+```bash
+# Start 7B AWQ servers (4x A10G)
+for i in 0 1 2 3; do
+    CUDA_VISIBLE_DEVICES=$i vllm serve Qwen/Qwen2.5-VL-7B-Instruct-AWQ \
+        --port $((8000+i)) --quantization awq --dtype float16 --max-model-len 8192
+done
+
+# Classify + OCR simple pages
+cd ~/eval-scripts/vllm/poc
+python run_20260216.py --phase all-7b --prompt-version v1
+
+# Stop 7B, start 32B AWQ (2 servers, TP=2)
+pkill -f vllm
+bash start_vllm_32b_awq.sh  # needs --max-model-len 16384 for complex pages
+
+# OCR complex pages
+python run_20260216.py --phase ocr-complex --prompt-version v2 \
+    --servers http://localhost:8000,http://localhost:8001 \
+    --model Qwen/Qwen2.5-VL-32B-Instruct-AWQ --max-tokens 8192
+
+# Compare results
+streamlit run compare_app.py
+```
+
+## Serving Infrastructure
+
+- **vLLM 7B AWQ**: 4 servers on ports 8000-8003, one A10G each (`--quantization awq --dtype float16 --max-model-len 8192`)
+- **vLLM 32B AWQ**: 2 servers on ports 8000-8001, TP=2 each (`--max-model-len 16384 --enforce-eager`)
+- **vLLM 72B**: 1 server, 8 GPUs with tensor parallelism
+- **MAX serve**: Single GPU alternative (future)
+- Model weights cached at `/opt/dlami/nvme/huggingface` (set `HF_HOME`)
+- All servers expose OpenAI-compatible `/v1/chat/completions` endpoint
+- 32B AWQ needs `NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1` for multi-GPU
 
 ## Text Normalization (for CER)
 
@@ -83,63 +145,32 @@ Applied before CER comparison (`normalize_text()`):
 - Collapse whitespace
 - The classify pipeline also strips `[[TAG]]` annotation markers
 
-## Serving Infrastructure
-
-- **vLLM 7B**: 4 servers on ports 8000-8003, one GPU each (`--dtype bfloat16 --max-model-len 32768`)
-- **vLLM 72B**: 1 server on port 8000, 8 GPUs with tensor parallelism (`--tensor-parallel-size 8`)
-- **MAX serve**: Single GPU alternative (`max serve --model-path ... --max-length 8192`)
-- Model weights cached at `/opt/dlami/nvme/huggingface`
-- All servers expose OpenAI-compatible `/v1/chat/completions` endpoint
-
-## Classification-Based Prompts (Advanced Pipeline)
-
-`prompts.py` implements a two-pass approach:
-1. **Classify**: Detect document features (multi-column, tables, handwritten, stamps, poor quality, strikethrough, non-Latin script, footnotes, forms)
-2. **Build prompt**: Assemble modular prompt blocks based on classification results
-3. Uses annotation tags: `[[H]]`, `[[C1]]`, `[[STAMP]]`, `[[S]]`, `[[LANG:xx]]`, `[[FN]]`, `[[HEADER]]`, `[[FOOTER]]`, `[[ILLEGIBLE]]`, `[[SUP]]`
-
 ## Ground Truth Format
 
 - Plain text with preserved layout
 - Tables use markdown pipe syntax with `<br>` for in-cell line breaks
 - Page numbers included (e.g., "0258 - 3 -")
-- Languages: primarily French, some Greek, German
+- Languages: primarily French, some Greek, German, Italian, Arabic
 
 ## Python Dependencies
 
 - `vllm`, `aiohttp`, `asyncio` (serving & async HTTP)
-- `pdf2image`, `Pillow` (image handling)
-- `pymupdf` (fitz), `pdfplumber` (PDF text extraction)
+- `pymupdf` (fitz) for PDF rendering to base64
+- `pdftotext` (system) for legacy PDF text extraction
 - `jiwer` or `python-Levenshtein` (CER calculation)
 - `streamlit`, `pandas` (comparison UI)
-- Conda environments: `max-ocr` (for MAX serve)
-
-## Running Evaluations
-
-```bash
-# Start vLLM servers
-bash ~/eval-scripts/vllm/Qw7b/start_vllm_servers.sh
-
-# Run 7B evaluation
-python ~/eval-scripts/vllm/Qw7b/ocr-eval-vllm.py ~/ocr-evaluation-samples/
-
-# Run 72B evaluation
-bash ~/eval-scripts/vllm/Qw72b/start_vllm_72.sh
-python ~/eval-scripts/vllm/Qw72b/ocr-eval-vllm.py ~/ocr-evaluation-samples/
-
-# Run classification-based pipeline
-python ~/eval-scripts/vllm/Qw7b/classify_prompts.py   # First: classify docs
-python ~/eval-scripts/vllm/Qw7b/ocr_pipeline.py       # Then: OCR with tailored prompts
-
-# Launch comparison UI
-streamlit run ~/eval-scripts/vllm/Qw7b/api/ocr_comparison_app.py
-```
 
 ## Path Convention
 
-All scripts use `Path(__file__).resolve().parent` to derive paths relative to their own location. Input data is read from `ocr-evaluation-samples/` and results are written alongside each script under `eval-scripts/`. No absolute `/home/ubuntu` paths exist in any Python script.
+All scripts use `Path(__file__).resolve().parent` to derive paths relative to their own location. Input data is read from `ocr-evaluation-samples/` and results are written under `eval-scripts/`. The exception is `run_20260216.py` which has a hardcoded `INPUT_DIR` for the 20260216 dataset path.
 
 ## Known Issues
 
-- `eval-scripts/vllm/Qw7b/results_failed_run/` shows all CER=1.0 with 0s inference time — this was a run where vLLM servers were not responding (Qwen OCR outputs are empty)
-- The `ocr_outputs` file in `ocr-evaluation-samples/` root is an empty file (0 bytes), not a directory
+- `eval-scripts/vllm/Qw7b/results_failed_run/` — all CER=1.0, servers were down
+- Legacy scripts in `Qw7b/` that imported `prompts.py` (now in `poc/`) are broken — `classify_prompts.py`, `ocr_pipeline.py`
+- 32B AWQ with `--max-model-len 8192` causes context overflow for complex pages (image tokens + prompt + max_tokens). Use 16384.
+- Some simple pages produce very short output (e.g., INV-0015-2019-0852_0437: 29 chars) — model may parrot prompt examples instead of OCR'ing
+
+## Current Branch
+
+`refactor/scripts` — active development of POC pipeline
