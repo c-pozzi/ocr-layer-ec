@@ -1,0 +1,156 @@
+0008
+
+[[C1]]
+1 階
+First floor
+Rez - de - chaussée
+
+< 記者棟   会見室棟 >
+
+1
+倉庫
+2
+
+3
+守衛室
+4
+仮眠室
+5
+資料保管庫
+6
+印刷室
+便所
+7
+入口ホール
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+[[ILLEGIBLE]]
+カウンター
+8
+受付
+9
+協会事務室
+10
+階段
+階段
+ホール
+カウンター
+11
+カメラマン控室
+12
+スチール現像室
+13
+国内新聞放送
+14
+国内雑誌業界紙
+15
+VIP 控室
+16
+VIP 入口ホール
+17
+VIP 便所
+化粧室
+18
+VIP 通路
+[[ILLEGIBLE]]
+19
+VIP 階段
+20
+シャワー室
+21
+機械ロッカー室
+22
+サービス窓口
+23
+打合せ室
+23
+打合せ室
+23
+打合せ室
+24
+国内ニュース映画
+25
+会議室
+26
+光庭
+27
+リフト
+10
+階段
+28
+空調機械室
+29
+給湯室
+6
+便所
+30
+ポンプ室
+31
+電気室
+
+3.180
+63.600
+3.180
+3.180
+19.080
+3.180
+3.180
+5.300
+8.480
+
+< 記者棟   会見室棟 >
+[[/C1]]
+
+[[C2]]
+| 番号 | 日 本 語 | 英 語 | 仏 語 |
+| :--- | :--- | :--- | :--- |
+| (1 | 階) | | (Rez - de - chaussée ) |
+| 1 | 倉庫 | Storage | Entrepôt |
+| 2 | 守 衛 室 | Guard Room | Salle de garde |
+| 3 | 仮 眠 室 | Sleeping Room | Dortoir |
+| 4 | 資 料 保 管 庫 | Record Archives | Archives |
+| 5 | 印 刷 室 | Printing Room | Salle d'imprimerie |
+| 6 | 便 所 | Lavatory | Toilettes |
+| 7 | 入 口 ホ ー ル | Entrance Hall | Vestibule |
+| 8 | 受 付 | Receptionists | Réception |
+| 9 | 協 会 事 務 室 | Office Room | Bureau |
+| 10 | 階 段 | Staircase | Escalier |
+| 11 | カ メ ラ マ ン 控 室 | Cameramen Waiting Room | Salle d'attente pour les photographes |
+| 12 | ス チ ー ル 現 像 室 | Photo Development Laboratory | Laboratoire de développement de photo |
+| | | | 
+| 13 | 国 内 新 聞 放 送 | Domestic Newspapers and | Journaux japonais et Radio - diffusion |
+| | Broadcasting Companies | | 
+| 14 | 国 内 雑 誌 ・ 業 界 紙 | Domestic Magazines and  | Revues japonaises et Journaux économiques |
+| | Trade Newspapers | | 
+| 15 | V I P 控 室 | VI P Room | Salle pour V.I.P. |
+| 16 | V I P 入 口 ホ ー ル | Entrance for VIP | Vestibule pour V.I.P. |
+| 17 | V I P 便 所 ・ 化 粧 室 | Lavatory for VIP | Toilette et Vestiaire pour V.I.P. |
+| | Dressing Room for VIP | | 
+| 18 | V I P 通 路 | Passage for VIP | Passage pour V.I.P. |
+| 19 | V I P 階 段 | Staircase For VIP | Escalier pour V.I.P. |
+| 20 | シ ャ ワ ー 室 | Shower bath | Douches |
+| 21 | 機 械 ロ ッ カ ー 室 | Equipment Storeroom | Entrepôt pour l'équipement |
+| 22 | サ ー ビ ス 窓 口 | Encounter [[H]] Service [[/H]] Room | Guichet de renseignements |
+| 23 | 打 合 せ 室 | Consultation Room | Salle de consultation |
+| 24 | 国 内 ニ ュ ー ス 映 画 | Domestic Newsreel | Film d'actualités japonaises |
+| 25 | 会 議 室 | Conference Room | Salle de Conférence |
+| 26 | 光 庭 | Interior Garden | Jardin intérieur |
+| 27 | リ フ ト | Elevator | Ascenseur |
+| 28 | 空 調 機 械 室 | Air - condition Control Room | Salle de contrôle de la climatisation |
+| 29 | 給 湯 室 | Kitchenette | Petite cuisine |
+| 30 | ポ ン プ 室 | Pumps Room | Salle des pompes |
+
+| | Correspondents room<br>Salle des corres<br>pondent | Briefing Hall<br>Hall po[[H]]u[[/H]]r<br>conference | Studio<br>Studio | Total<br>Total |
+| :--- | :---: | :---: | :---: | :---: |
+| First floor<br>Rez - de - chaussée | 1630.77 m² | 494.30 m² | 0 m² | 2125.07 m² |
+| Second floor<br>Premier étage | 2085.83 " | 1178.12 " | 1179.19 " | 4443.14 " |
+| Third floor<br>Deuxième étages | 2085.83 " | 475.78 " | 0 " | 2561.61 " |
+| Total | 5802.43 " | 2148.20 " | 1179.19 " | 9129.82 " |
+[[/C2]]

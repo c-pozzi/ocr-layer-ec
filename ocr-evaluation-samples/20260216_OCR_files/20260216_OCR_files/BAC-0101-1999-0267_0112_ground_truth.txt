@@ -1,0 +1,58 @@
+0112 - 65 - 
+
+L'étude du génome de certains de ces virus cancérigènes (rétrovirus) a
+permis de découvrir des gènes responsables de la cancérisation, les
+oncogènes viraux, qui sont capables de déclencher des tumeurs après
+qu'ils se soient incorporés dans le génome des cellules de l'animal
+atteint.
+
+Ces résultats ont entraîné un regain d'intérêt pour la recherche de
+virus oncogènes pour l'homme. Différentes observations récentes
+mettent en cause la présence fréquente d'un virus dans des cas de
+cancer. Ces virus seraient donc soit la cause directe, soit un facteur
+favorisant. On peut mentionner comme exemple de ces relations plus ou
+moins étroites les rapports du cancer du col de l'utérius et des
+organes génitaux externes avec le viru[[ILLEGIBLE]] des papillomes humains, ceux
+de tumeurs des ganglions lymphatiques (Lymphome de Burkitt) avec le
+virus d'Epstein-Barr, ceux du sarcome de Kaposi avec le virus du SIDA,
+ceux des leucémies avec les lymphomes à cellules T avec les virus HTLV
+1 et 2, enfin ceux du cancer du foie avec le virus de l'hépatite B.
+
+La découverte en 1976, par le chercheur français Dominique Stehelin31
+en collaboration avec une équipe américaine, dans le génôme des
+cellul[[ILLEGIBLE]] animales et humaines normales de gènes qui ont une séquence
+codante voisine des oncogènes des rétrovirus a conduit à revoir
+complètement les mécanismes de cancérogenèse. En 1982, un groupe de
+chercheurs américains, dirigé par l'Espagnol M. Barbacid 32 ,
+démontrait que l'activation d'un oncogène humain (responsable d'un
+cancer de la vessie) était due à une mutation d'un acide aminé d'un
+oncogène, et en 1983 le même laboratoire démontrait que le carcinome
+mammaire provoqué chez le rat par un agent chimique résultait d'une
+mutation spécifique d'un oncogène qui se produit toujours sur le même
+acide aminé. L'exploration des aspects génétiques du cancer qui vient
+de s'amorcer doit s'amplifier à l'avenir.
+
+Proposition d'action 73 : Cofinancement par la Communauté européenne
+de recherches sur le génôme et les oncogènes humains. Cette action
+sera proposée par la Commission européenne dans le programme de
+médecine prédictive (1987 - 1989) qui sera transmise au début de 1987
+au Conseil. Les oncogènes cellulaires ont des fonctions normales
+importantes, dans la régulation de la division et de la
+différenciation cellulaires. Une tumeur peut donc être due à des
+perturbations d'origine externe telles que l'apport d'un oncogène
+viral, la mutation d'un oncogène de la cellule, une rupture
+chromosomique séparant un oncogène de son système de régulation
+adjacent sur la chaîne d'ADN, ou à toute autre perturbation du sytème
+de contrôle d'un oncogène.
+
+On connaît actuellement plus de 25 oncogènes dont on sait repérer le
+code génétique dans certaines tumeurs comme les leucémies ou les
+lymphomes et ceci revêt une certaine importance pratique, car selon
+l'oncogène en cause le pronostic peut être plus ou moins sévère.
+
+(31) D. Stehelin, V.E. Varmus, J.M. Bishop & P.K. Vogt, 1976, DNA
+related to the transforming gene(s) of avian sarcoma virus is present
+in normal avian DNA, Nature 260, 170 - 173
+(32) Reddy E.P. Reynolds R.K., Santos E. & Barbacid M. 1982, A point
+mutation responsible for the acquisition of transforming properties by
+the T24 human bladder carcinoma antigen, Nature 300, 149 - 152

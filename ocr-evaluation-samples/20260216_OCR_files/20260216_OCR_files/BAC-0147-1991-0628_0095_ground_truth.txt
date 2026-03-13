@@ -1,0 +1,19 @@
+- 2 -                                   0095                      Liste 1 B
+
+| N.º du<br>TDP | Designation des marchandises |
+| :--- | :--- |
+| 05.15 | Produits d'origine animale, non dénommés ni compris ailleurs;<br>animaux morts des Chapitres 1 ou 3,impropres à la consomma-<br>tion humaine: |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;03 | Tendons et nerfs;rognures et autres déchets similaires de<br>peaux non tannées |
+| 09.03 | Maté . |
+| 13.02 | Gomme laque, même blanchie; gommes-résines, résines et baumes<br>naturels |
+| 13.03 | Sucs et extraits végétaux; matières pectiques, pectinates et<br>pectates; agar-agar et autres mucilages et épaississants dé-<br>rivés des végétaux: |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;01 | Opium |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;02 | Extrait d'opium |
+| &nbsp;&nbsp;&nbsp;&nbsp;ex 03 | Produits non dénommés:<br>- à l'exclusion des matières pectiques et pectinates et<br>du carragenan |
+| 14.01 | Matières végétales employées principalement en vannerie ou<br>en sparterie (osiers, roseaux, bambous, rotins, joncs, raphia,<br>pailles de céréales nettoyées, blanchies ou teintes, écorces<br>de tilleul et similaires) |
+| 14.02 | Matières végétales employées principalement pour le rembour-<br>rage (kapok, crin végétal, crin marin et similaires), même en<br>nappes avec ou sans support en autres matières |
+| 14.03 | Matières végétales employées principalement pour la fabrica-<br>tion des balais et des brosses (sorgho, piassava, chiendent,<br>istle et similaires), même en torsades ou en faisceaux |
+| 14.05 | Produits d'origine végétale, non dénommés ni compris ailleurs |
+| 15.05 | " Graisses de suint et substances grasses dérivées, y compris<br>la lanoline |
+| 15.06 | Autres graisses et huiles animales (huile de pied de boeuf.,<br>graisses d'os, graisses de déchets, etc.) |
+| 15.08 | Huiles animales ou végétales. cuites, oxydées,déshydratées,<br>sulfurées, soufflées,standolisées ou autrement modifiées |
