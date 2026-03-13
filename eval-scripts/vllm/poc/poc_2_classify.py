@@ -36,7 +36,11 @@ from poc_utils import (
     save_checkpoint_entry,
     make_page_id,
     ProgressTracker,
+    get_classification_fields,
 )
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from prompts import get_classify_prompt
 
 
 def parse_args():
@@ -48,6 +52,12 @@ def parse_args():
         choices=list(MODEL_CONFIGS.keys()),
         default="awq",
         help="Model variant (default: awq)",
+    )
+    parser.add_argument(
+        "--profile",
+        choices=["full", "lite"],
+        default="full",
+        help="Classification profile: full (9 features) or lite (4 features) (default: full)",
     )
     parser.add_argument(
         "--manifest",
@@ -120,30 +130,31 @@ def load_manifest(manifest_path: str) -> list[dict]:
 # CSV WRITER
 # =============================================================================
 
-OUTPUT_FIELDNAMES = [
-    "pdf_filename", "page_num", "total_pages",
-    "multi_column", "has_tables", "handwritten", "has_stamps",
-    "poor_quality", "has_strikethrough", "latin_script",
-    "has_footnotes", "has_forms", "is_complex",
-    "classify_time_sec", "render_time_sec", "total_time_sec",
-    "server", "queue_wait_sec", "error", "raw_response",
-]
+def build_output_fieldnames(profile: str = "full") -> list[str]:
+    """Build CSV fieldnames based on classification profile."""
+    fields = get_classification_fields(profile)
+    return [
+        "pdf_filename", "page_num", "total_pages",
+        *fields, "is_complex",
+        "classify_time_sec", "render_time_sec", "total_time_sec",
+        "server", "queue_wait_sec", "error", "raw_response",
+    ]
 
 
 class CSVResultWriter:
     """Thread-safe incremental CSV writer."""
 
-    def __init__(self, output_path: Path, resume: bool = False):
+    def __init__(self, output_path: Path, fieldnames: list[str], resume: bool = False):
         self.output_path = output_path
         self._lock = asyncio.Lock()
 
         if resume and output_path.exists():
             # Append mode — header already written
             self._file = open(output_path, "a", newline="", encoding="utf-8")
-            self._writer = csv.DictWriter(self._file, fieldnames=OUTPUT_FIELDNAMES)
+            self._writer = csv.DictWriter(self._file, fieldnames=fieldnames)
         else:
             self._file = open(output_path, "w", newline="", encoding="utf-8")
-            self._writer = csv.DictWriter(self._file, fieldnames=OUTPUT_FIELDNAMES)
+            self._writer = csv.DictWriter(self._file, fieldnames=fieldnames)
             self._writer.writeheader()
 
     async def write_row(self, row: dict):
@@ -217,10 +228,16 @@ async def consumer(
     queue_max: int,
     done_event: asyncio.Event,
     model_name: str = MODEL_CONFIGS["awq"],
+    classify_prompt: str | None = None,
+    classification_fields: list[str] | None = None,
 ):
     """
     Pull rendered pages from queue, classify via vLLM, write results.
     """
+    if classification_fields is None:
+        from poc_utils import CLASSIFICATION_FIELDS
+        classification_fields = CLASSIFICATION_FIELDS
+
     while True:
         # Check if we should stop
         if done_event.is_set() and queue.empty():
@@ -243,11 +260,8 @@ async def consumer(
                 "pdf_filename": page_info["pdf_filename"],
                 "page_num": page_info["page_num"],
                 "total_pages": page_info["total_pages"],
-                **{f: None for f in [
-                    "multi_column", "has_tables", "handwritten", "has_stamps",
-                    "poor_quality", "has_strikethrough", "latin_script",
-                    "has_footnotes", "has_forms", "is_complex",
-                ]},
+                **{f: None for f in classification_fields},
+                "is_complex": None,
                 "classify_time_sec": 0,
                 "render_time_sec": item["render_time"],
                 "total_time_sec": item["render_time"],
@@ -267,22 +281,20 @@ async def consumer(
 
         # Classify via vLLM
         classification, classify_time = await classify_image_async(
-            session, server_url, item["image_b64"], model_name=model_name
+            session, server_url, item["image_b64"],
+            model_name=model_name, prompt=classify_prompt,
         )
 
         total_time = item["render_time"] + queue_wait + classify_time
-        flat = flatten_classification(classification)
+        flat = flatten_classification(classification, fields=classification_fields)
         has_error = flat["error"] is not None
 
         row = {
             "pdf_filename": page_info["pdf_filename"],
             "page_num": page_info["page_num"],
             "total_pages": page_info["total_pages"],
-            **{k: flat[k] for k in [
-                "multi_column", "has_tables", "handwritten", "has_stamps",
-                "poor_quality", "has_strikethrough", "latin_script",
-                "has_footnotes", "has_forms", "is_complex",
-            ]},
+            **{k: flat[k] for k in classification_fields},
+            "is_complex": flat["is_complex"],
             "classify_time_sec": round(classify_time, 4),
             "render_time_sec": round(item["render_time"], 4),
             "total_time_sec": round(total_time, 4),
@@ -310,13 +322,19 @@ async def run_classification(args):
     """Main async orchestrator: producer-consumer pipeline."""
 
     model_name = MODEL_CONFIGS[args.model]
+    profile = args.profile
+    model_key = f"{args.model}-{profile}" if profile != "full" else args.model
+    classify_prompt = get_classify_prompt(profile)
+    classification_fields = get_classification_fields(profile)
+    output_fieldnames = build_output_fieldnames(profile)
 
     # If --manifest not given, we need to find any existing run dir for this model.
     # We scan RESULTS_DIR for dirs starting with "<model>__" and pick the manifest.
+    # For lite profile, first look for the base model run dir (manifest is shared).
     if args.manifest:
         manifest_path = Path(args.manifest)
     else:
-        # Find matching run dirs
+        # Find matching run dirs — look for base model key (manifest lives there)
         pattern = f"{args.model}__*"
         candidates = sorted(RESULTS_DIR.glob(pattern))
         if not candidates:
@@ -344,9 +362,9 @@ async def run_classification(args):
         print("Empty manifest.")
         sys.exit(1)
 
-    # Derive run dir from model + input folder
+    # Derive run dir from model key + input folder
     input_folder = manifest[0]["folder"]
-    run_dir = make_run_dir(args.model, input_folder)
+    run_dir = make_run_dir(model_key, input_folder)
     run_dir.mkdir(parents=True, exist_ok=True)
 
     output_path = Path(args.output) if args.output else run_dir / "classification.csv"
@@ -384,6 +402,7 @@ async def run_classification(args):
     queue_size = args.queue_size
 
     print(f"\nConfiguration:")
+    print(f"  Profile: {profile} ({len(classification_fields)} features)")
     print(f"  Servers: {len(healthy_servers)}")
     print(f"  Concurrency/server: {concurrency_per_server}")
     print(f"  Total concurrent requests: {total_consumers}")
@@ -396,7 +415,7 @@ async def run_classification(args):
     # Setup
     queue = asyncio.Queue(maxsize=queue_size)
     progress = ProgressTracker(total=len(manifest), log_interval=args.log_interval)
-    csv_writer = CSVResultWriter(output_path, resume=args.resume)
+    csv_writer = CSVResultWriter(output_path, fieldnames=output_fieldnames, resume=args.resume)
     done_event = asyncio.Event()
 
     connector = aiohttp.TCPConnector(limit=total_consumers + 4)
@@ -418,6 +437,8 @@ async def run_classification(args):
                     queue_max=queue_size,
                     done_event=done_event,
                     model_name=model_name,
+                    classify_prompt=classify_prompt,
+                    classification_fields=classification_fields,
                 )
             )
             consumer_tasks.append(task)
@@ -450,6 +471,8 @@ async def run_classification(args):
     meta = {
         "model": args.model,
         "model_name": model_name,
+        "profile": profile,
+        "classification_fields": classification_fields,
         "input_folder": input_folder,
         "instance": args.instance,
         "wall_time_sec": round(summary["wall_time_sec"], 2),

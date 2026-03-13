@@ -33,7 +33,7 @@ import aiohttp
 
 # Allow importing prompts.py from parent directory
 SCRIPT_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(SCRIPT_DIR.parent))
+sys.path.insert(0, str(SCRIPT_DIR))
 
 from prompts import build_prompt, BASE_PROMPT, HEADER_FOOTER_BLOCK, OUTPUT_FORMAT
 

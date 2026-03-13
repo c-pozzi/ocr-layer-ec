@@ -22,7 +22,7 @@ import fitz  # PyMuPDF
 
 # Allow importing prompts.py from parent directory
 SCRIPT_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(SCRIPT_DIR.parent))
+sys.path.insert(0, str(SCRIPT_DIR))
 
 from prompts import get_classify_prompt
 
@@ -36,12 +36,24 @@ CLASSIFICATION_FIELDS = [
     "has_footnotes", "has_forms",
 ]
 
+CLASSIFICATION_FIELDS_LITE = [
+    "multi_column", "has_tables", "poor_quality", "has_non_latin",
+]
+
+
+def get_classification_fields(profile: str = "full") -> list[str]:
+    """Return the classification field list for the given profile."""
+    if profile == "lite":
+        return CLASSIFICATION_FIELDS_LITE
+    return CLASSIFICATION_FIELDS
+
 VLLM_SERVERS = [f"http://localhost:{8000 + i}" for i in range(4)]
 VLLM_ENDPOINT = "/v1/chat/completions"
 
 MODEL_CONFIGS = {
     "bf16": "Qwen/Qwen2.5-VL-7B-Instruct",
     "awq": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+    "32b-awq": "Qwen/Qwen2.5-VL-32B-Instruct-AWQ",
     "72b-awq": "Qwen/Qwen2.5-VL-72B-Instruct-AWQ",
 }
 
@@ -129,6 +141,7 @@ async def classify_image_async(
     image_b64: str,
     model_name: str = MODEL_CONFIGS["awq"],
     request_timeout: float = 60.0,
+    prompt: str | None = None,
 ) -> tuple[dict, float]:
     """
     Send a single image to vLLM for classification.
@@ -136,6 +149,7 @@ async def classify_image_async(
     Returns:
         (parsed_result_dict, inference_time_sec)
     """
+    classify_prompt = prompt if prompt is not None else CLASSIFY_PROMPT
     payload = {
         "model": model_name,
         "messages": [
@@ -146,7 +160,7 @@ async def classify_image_async(
                         "type": "image_url",
                         "image_url": {"url": f"data:image/png;base64,{image_b64}"},
                     },
-                    {"type": "text", "text": CLASSIFY_PROMPT},
+                    {"type": "text", "text": classify_prompt},
                 ],
             }
         ],
@@ -257,16 +271,19 @@ def parse_classification_json(content: str) -> dict:
 # CLASSIFICATION HELPERS
 # =============================================================================
 
-def flatten_classification(classification: dict) -> dict:
+def flatten_classification(classification: dict, fields: list[str] | None = None) -> dict:
     """Flatten classification dict for CSV output, with error handling."""
+    if fields is None:
+        fields = CLASSIFICATION_FIELDS
+
     if "error" in classification:
-        result = {f: None for f in CLASSIFICATION_FIELDS}
+        result = {f: None for f in fields}
         result["is_complex"] = None
         result["error"] = classification.get("error")
         result["raw_response"] = classification.get("raw_response", "")
         return result
 
-    result = {f: classification.get(f) for f in CLASSIFICATION_FIELDS}
+    result = {f: classification.get(f) for f in fields}
     result["is_complex"] = is_complex(classification)
     result["error"] = None
     result["raw_response"] = ""
@@ -280,12 +297,21 @@ def is_complex(cls: dict) -> bool:
     Complex if any of:
     - has_tables
     - handwritten
-    - poor_quality
-    - multi_column AND has_tables together
+    - has_non_latin (non-Latin scripts like Cyrillic, Japanese, Arabic)
+    - poor_quality AND at least one other flag (multi_column, has_tables, has_non_latin)
+      (poor_quality alone is not enough — the 7B model flags it too aggressively)
     """
+    tables = cls.get("has_tables", False)
+    handwritten = cls.get("handwritten", False)
+    non_latin = cls.get("has_non_latin", False)
+    poor = cls.get("poor_quality", False)
+    multi_col = cls.get("multi_column", False)
+
     return (
-        any(cls.get(f, False) for f in ["has_tables", "handwritten", "poor_quality"])
-        or (cls.get("multi_column", False) and cls.get("has_tables", False))
+        tables
+        or handwritten
+        or non_latin
+        or (poor and (tables or non_latin or multi_col))
     )
 
 

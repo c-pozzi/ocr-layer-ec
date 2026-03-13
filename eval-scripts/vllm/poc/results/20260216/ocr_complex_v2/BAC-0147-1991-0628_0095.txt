@@ -1,0 +1,25 @@
+```markdown
+[[HEADER]]
+0095
+Liste 1 B
+[[/HEADER]]
+
+| N.9 du TDP | Désignation des marchandises |
+|------------|-------------------------------|
+| 05.15      | Produits d'origine animale, non dénommés ni compris ailleurs; animaux morts des Chapitres 1 ou 3, impropre à la consommation humaine: |
+|            | Tendons et nerfs; rognures et autres déchets similaires de peaux non tannées |
+| 03         | Maté. |
+| 09.03      | Comme laque, même blanchie; gommes-résines, résines et baumes naturels |
+| 13.02      | Sucs et extraits végétaux; matières pectiques, pectinates et pectates; agar-agar et autres mucilages et épaississants dérivés des végétaux: |
+| 13.03      | Opium |
+| 01         | Extrait d'opium |
+| 02         | Produits non dénommés: |
+| ex 03      | - à l'exclusion des matières pectiques et pectinates et du carragenan |
+| 14.01      | Matières végétales employées principalement en vannerie ou en sparterie (osiers, roseaux, bambous, rotins, joncs, raphia, pailles de céréales nettoyées, blanchies ou teintes, écorces de tilleul et similaires) |
+| 14.02      | Matières végétales employées principalement pour le rembourrage (knopk, crin végétal, crin marin et similaires), même en nappes avec ou sans support en autres matières |
+| 14.03      | Matières végétales employées principalement pour la fabrication des balais et des brosses (sorgho, piassava, chiendent, istle et similaires), même en torsades ou en faisceaux |
+| 14.05      | Produits d'origine végétale, non dénommés ni compris ailleurs |
+| 15.05      | Graisses de suint et substances grasses dérivées, y compris la lanoline |
+| 15.06      | Autres graisses et huiles animales (huile de pied de boeuf, graisses d'os, graisses de déchets, etc.) |
+| 15.08      | Huiles animales ou végétales, cuites, oxydées, déshydratées, sulfurées, soufflées, standolisées ou autrement modifiées |
+```

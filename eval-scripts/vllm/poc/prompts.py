@@ -39,9 +39,34 @@ CLASSIFY_PROMPT = """Analyze this document image and return ONLY a JSON object w
   "has_stamps": true/false,      // Contains official stamps or date stamps
   "poor_quality": true/false,    // Faded, stained, skewed, or hard to read
   "has_strikethrough": true/false, // Contains crossed-out/struck text
-  "latin_script": true/false,    // ALL text uses Latin alphabet (false if Greek, Cyrillic, Arabic present)
+  "has_non_latin": true/false,   // true if document contains ANY Cyrillic, Japanese, Chinese, Arabic, Greek, Korean, Thai, or Hebrew characters
   "has_footnotes": true/false,   // Contains footnotes at bottom of page
   "has_forms": true/false        // Contains pre-printed fields designed to be filled in
+}
+
+Return ONLY the JSON, no explanation."""
+
+CLASSIFY_PROMPT_LITE = """Look at this document image carefully. Identify the writing systems used.
+
+To identify non-Latin scripts, look for these characters:
+- Arabic: ا ب ج د ر س ع م و ن
+- Cyrillic: Д Ж З И Л Ф Ц Ч Ш Щ Ю Я
+- Japanese: あ い う え お か (hiragana) / ア イ ウ (katakana) / 日 本 語 (kanji)
+- Chinese: 中 文 字 的 是 国
+- Greek: α β γ δ ε Σ Ω Δ Π Λ
+- Hebrew: א ב ג ד ה ו מ ש
+- Korean: 가 나 다 라 한 글
+
+If you see characters clearly matching any of the above → has_non_latin: true
+If unsure or text is degraded/noisy → has_non_latin: false
+
+Return ONLY a JSON object with these boolean fields:
+
+{
+  "multi_column": true/false,    // Text arranged in 2+ parallel columns
+  "has_tables": true/false,      // Contains tabular data with rows/columns
+  "poor_quality": true/false,    // Faded, stained, skewed, or hard to read
+  "has_non_latin": true/false    // true ONLY if you clearly see characters from the scripts listed above
 }
 
 Return ONLY the JSON, no explanation."""
@@ -93,6 +118,11 @@ This document contains tables. Apply these rules:
 - Use [[ILLEGIBLE]] for unreadable cells
 - Leave empty cells empty (not marked illegible)
 - If table has handwritten content: | [[H]]value[[/H]] |
+- For pre-printed forms where only some columns are filled: only create columns
+  for those that contain actual data. Do not create empty placeholder columns
+  for blank fields in a sparse form.
+- If a table has only one filled column out of several printed columns,
+  represent only that column's data linearly, not as a wide empty table.
 
 Example:
 | Header 1 | Header 2 | Header 3 |
@@ -250,7 +280,7 @@ def build_prompt(classification: dict) -> str:
     if classification.get("poor_quality", False):
         blocks.append(POOR_QUALITY_BLOCK)
     
-    if not classification.get("latin_script", True):  # Default True, add block if False
+    if classification.get("has_non_latin", False):  # Add non-Latin block if has_non_latin is True
         blocks.append(NON_LATIN_BLOCK)
     
     if classification.get("has_footnotes", False):
@@ -266,8 +296,10 @@ def build_prompt(classification: dict) -> str:
     return "\n".join(blocks)
 
 
-def get_classify_prompt() -> str:
-    """Return the classification prompt."""
+def get_classify_prompt(profile: str = "full") -> str:
+    """Return the classification prompt for the given profile."""
+    if profile == "lite":
+        return CLASSIFY_PROMPT_LITE
     return CLASSIFY_PROMPT
 
 
@@ -296,6 +328,130 @@ def list_blocks() -> list:
 def get_block(name: str) -> str:
     """Get a specific block by name."""
     return BLOCK_REGISTRY.get(name, "")
+
+
+# =============================================================================
+# PROMPT VERSIONS - For A/B testing different prompt strategies
+# =============================================================================
+
+# v1: Original prompts (all annotation tags, full blocks)
+# To create a new version, add an entry here with any overrides.
+# Keys can be:
+#   "base_prompt": override BASE_PROMPT
+#   "output_format": override OUTPUT_FORMAT
+#   "header_footer": override HEADER_FOOTER_BLOCK
+#   "blocks": dict of block_name -> override string (or None to disable)
+#   "simple_prompt": override the entire simple prompt (bypass build_prompt)
+#   "build_prompt_fn": custom function(classification) -> str
+
+TABLE_BLOCK_V1 = """
+## Tables
+This document contains tables. Apply these rules:
+- Render tables using Markdown table syntax
+- Preserve all visible rows and columns
+- Use [[ILLEGIBLE]] for unreadable cells
+- Leave empty cells empty (not marked illegible)
+- If table has handwritten content: | [[H]]value[[/H]] |
+
+Example:
+| Header 1 | Header 2 | Header 3 |
+|----------|----------|----------|
+| Cell 1   | Cell 2   | Cell 3   |
+| Cell 4   | [[ILLEGIBLE]] | Cell 6 |
+
+If a table appears inside a column, place the markdown table inside the column tags.
+"""
+
+PROMPT_VERSIONS = {
+    "v1": {
+        "description": "Original: annotation tags, all modular blocks",
+        "blocks": {"has_tables": TABLE_BLOCK_V1},
+    },
+    "v2": {
+        "description": "Sparse form handling: skip empty columns in tables",
+        # Uses current TABLE_BLOCK (default) which has the sparse form rules
+    },
+}
+
+
+def get_prompt_version(version: str) -> dict:
+    """Get prompt version config. Returns empty dict for v1 (defaults)."""
+    if version not in PROMPT_VERSIONS:
+        available = ", ".join(sorted(PROMPT_VERSIONS.keys()))
+        raise ValueError(f"Unknown prompt version '{version}'. Available: {available}")
+    return PROMPT_VERSIONS[version]
+
+
+def build_prompt_versioned(classification: dict, version: str = "v1") -> str:
+    """
+    Build OCR prompt using a specific prompt version.
+
+    Version config can override base_prompt, output_format, header_footer,
+    individual blocks, or provide a complete simple_prompt or build_prompt_fn.
+    """
+    cfg = get_prompt_version(version)
+
+    # Custom build function takes priority
+    if "build_prompt_fn" in cfg:
+        return cfg["build_prompt_fn"](classification)
+
+    base = cfg.get("base_prompt", BASE_PROMPT)
+    output_fmt = cfg.get("output_format", OUTPUT_FORMAT)
+    header_footer = cfg.get("header_footer", HEADER_FOOTER_BLOCK)
+    block_overrides = cfg.get("blocks", {})
+
+    blocks = [base]
+
+    # Map classification flags to default blocks
+    flag_to_block = [
+        ("multi_column", COLUMN_BLOCK),
+        ("handwritten", HANDWRITTEN_BLOCK),
+        ("has_tables", TABLE_BLOCK),
+        ("has_stamps", STAMP_BLOCK),
+        ("has_strikethrough", STRIKETHROUGH_BLOCK),
+        ("poor_quality", POOR_QUALITY_BLOCK),
+        ("has_footnotes", FOOTNOTE_BLOCK),
+        ("has_forms", FORMS_BLOCK),
+    ]
+
+    for flag, default_block in flag_to_block:
+        if classification.get(flag, False):
+            block = block_overrides.get(flag, default_block)
+            if block is not None:  # None means disabled
+                blocks.append(block)
+
+    # Non-Latin block: add when has_non_latin is True (or legacy latin_script is False)
+    if classification.get("has_non_latin", False) or not classification.get("latin_script", True):
+        block = block_overrides.get("non_latin", NON_LATIN_BLOCK)
+        if block is not None:
+            blocks.append(block)
+
+    blocks.append(header_footer)
+    blocks.append(output_fmt)
+
+    return "\n".join(blocks)
+
+
+def build_simple_prompt_versioned(version: str = "v1") -> str:
+    """Build simple prompt for a specific version."""
+    cfg = get_prompt_version(version)
+
+    # Direct override
+    if "simple_prompt" in cfg:
+        return cfg["simple_prompt"]
+
+    base = cfg.get("base_prompt", BASE_PROMPT)
+    header_footer = cfg.get("header_footer", HEADER_FOOTER_BLOCK)
+    output_fmt = cfg.get("output_format", OUTPUT_FORMAT)
+
+    return "\n".join([base, header_footer, output_fmt])
+
+
+def list_prompt_versions() -> None:
+    """Print available prompt versions."""
+    for name, cfg in sorted(PROMPT_VERSIONS.items()):
+        desc = cfg.get("description", "(no description)")
+        print(f"  {name}: {desc}")
 
 
 # =============================================================================
