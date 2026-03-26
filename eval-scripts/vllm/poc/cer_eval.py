@@ -220,11 +220,11 @@ def evaluate_directory(
                 pdf_raw = extract_pdf_text(pdf_path)
                 pdf_norm = normalize_full(pdf_raw)
                 pdf_metrics = compute_metrics(gt_norm, pdf_norm)
-                row["pdf_chars"] = len(pdf_norm)
-                row["pdf_cer"] = round(pdf_metrics["cer"], 4)
-                row["pdf_wer"] = round(pdf_metrics["wer"], 4)
-                row["cer_improvement"] = round(row["pdf_cer"] - row["cer"], 4)
-                row["wer_improvement"] = round(row["pdf_wer"] - row["wer"], 4)
+                row["code_chars"] = len(pdf_norm)
+                row["code_cer"] = round(pdf_metrics["cer"], 4)
+                row["code_wer"] = round(pdf_metrics["wer"], 4)
+                row["cer_improvement"] = round(row["code_cer"] - row["cer"], 4)
+                row["wer_improvement"] = round(row["code_wer"] - row["wer"], 4)
 
         results.append(row)
 
@@ -261,18 +261,18 @@ def print_summary(results: list[dict]):
     print(f"  WER  — mean: {statistics.mean(wers):.4f}  median: {statistics.median(wers):.4f}  "
           f"min: {min(wers):.4f}  max: {max(wers):.4f}")
 
-    has_pdf = "pdf_cer" in results[0]
+    has_pdf = "code_cer" in results[0]
     if has_pdf:
-        pdf_cers = [r["pdf_cer"] for r in results if "pdf_cer" in r]
-        pdf_wers = [r["pdf_wer"] for r in results if "pdf_wer" in r]
+        code_cers = [r["code_cer"] for r in results if "code_cer" in r]
+        code_wers = [r["code_wer"] for r in results if "code_wer" in r]
         cer_impr = [r["cer_improvement"] for r in results if "cer_improvement" in r]
         wer_impr = [r["wer_improvement"] for r in results if "wer_improvement" in r]
-        print(f"  PDF CER — mean: {statistics.mean(pdf_cers):.4f}  median: {statistics.median(pdf_cers):.4f}  "
-              f"min: {min(pdf_cers):.4f}  max: {max(pdf_cers):.4f}")
-        print(f"  PDF WER — mean: {statistics.mean(pdf_wers):.4f}  median: {statistics.median(pdf_wers):.4f}  "
-              f"min: {min(pdf_wers):.4f}  max: {max(pdf_wers):.4f}")
-        print(f"  CER improvement (PDF-AI) — mean: {statistics.mean(cer_impr):+.4f}  median: {statistics.median(cer_impr):+.4f}")
-        print(f"  WER improvement (PDF-AI) — mean: {statistics.mean(wer_impr):+.4f}  median: {statistics.median(wer_impr):+.4f}")
+        print(f"  Code CER — mean: {statistics.mean(code_cers):.4f}  median: {statistics.median(code_cers):.4f}  "
+              f"min: {min(code_cers):.4f}  max: {max(code_cers):.4f}")
+        print(f"  Code WER — mean: {statistics.mean(code_wers):.4f}  median: {statistics.median(code_wers):.4f}  "
+              f"min: {min(code_wers):.4f}  max: {max(code_wers):.4f}")
+        print(f"  CER improvement (Code-AI) — mean: {statistics.mean(cer_impr):+.4f}  median: {statistics.median(cer_impr):+.4f}")
+        print(f"  WER improvement (Code-AI) — mean: {statistics.mean(wer_impr):+.4f}  median: {statistics.median(wer_impr):+.4f}")
 
     print(f"{'='*60}\n")
 
@@ -280,14 +280,14 @@ def print_summary(results: list[dict]):
     hdr = f"  {'doc_id':<40} {'CER':>8} {'WER':>8}"
     sep = f"  {'-'*40} {'-'*8} {'-'*8}"
     if has_pdf:
-        hdr += f" {'PDF_CER':>8} {'PDF_WER':>8} {'CER_imp':>8} {'WER_imp':>8}"
+        hdr += f" {'Code_CER':>8} {'Code_WER':>8} {'CER_imp':>8} {'WER_imp':>8}"
         sep += f" {'-'*8} {'-'*8} {'-'*8} {'-'*8}"
     print(hdr)
     print(sep)
 
     for r in sorted(results, key=lambda x: x["cer"], reverse=True):
         line = f"  {r['doc_id']:<40} {r['cer']:>8.4f} {r['wer']:>8.4f}"
-        if has_pdf and "pdf_cer" in r:
+        if has_pdf and "code_cer" in r:
             line += (f" {r['pdf_cer']:>8.4f} {r['pdf_wer']:>8.4f}"
                      f" {r.get('cer_improvement', 0):>+8.4f} {r.get('wer_improvement', 0):>+8.4f}")
         print(line)

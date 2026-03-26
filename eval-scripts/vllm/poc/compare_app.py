@@ -106,6 +106,81 @@ def build_doc_index(input_dir: Path, ocr_dirs: list[Path]) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# Differences summary
+# ---------------------------------------------------------------------------
+
+def _build_diff_summary(reference: str, hypothesis: str, context_radius: int = 15) -> list[dict]:
+    """Find character-level differences and return them with word context.
+
+    Each entry: {pos, ref_char, hyp_char, ref_word, hyp_word}
+    """
+    sm = difflib.SequenceMatcher(None, reference, hypothesis, autojunk=False)
+    diffs: list[dict] = []
+
+    for op, i1, i2, j1, j2 in sm.get_opcodes():
+        if op == "equal":
+            continue
+
+        # Find the word containing each side of the change
+        def _word_at(text: str, start: int, end: int) -> str:
+            # Expand to word boundaries
+            lo = start
+            while lo > 0 and not text[lo - 1].isspace():
+                lo -= 1
+            hi = end
+            while hi < len(text) and not text[hi].isspace():
+                hi += 1
+            return text[lo:hi]
+
+        ref_snippet = reference[i1:i2] if i1 < i2 else ""
+        hyp_snippet = hypothesis[j1:j2] if j1 < j2 else ""
+
+        diffs.append({
+            "op": op,
+            "pos": i1,
+            "ref_chars": ref_snippet,
+            "hyp_chars": hyp_snippet,
+            "ref_word": _word_at(reference, i1, i2) if ref_snippet else "",
+            "hyp_word": _word_at(hypothesis, j1, j2) if hyp_snippet else "",
+        })
+
+    return diffs
+
+
+def _render_diff_summary(reference: str, hypothesis: str, label: str = "AI OCR"):
+    """Render a differences summary box comparing reference (GT) and hypothesis."""
+    diffs = _build_diff_summary(reference, hypothesis)
+    if not diffs:
+        st.success(f"**{label}**: Identical to ground truth (0 differences)")
+        return
+
+    n = len(diffs)
+    st.warning(f"**{label}**: {n} difference{'s' if n != 1 else ''} detected")
+
+    rows = []
+    for d in diffs:
+        op = d["op"]
+        if op == "replace":
+            desc = f"`{d['ref_chars']}` → `{d['hyp_chars']}`"
+            context = f'in "{d["ref_word"]}" → "{d["hyp_word"]}"'
+        elif op == "delete":
+            desc = f"`{d['ref_chars']}` deleted"
+            context = f'from "{d["ref_word"]}"'
+        elif op == "insert":
+            desc = f"`{d['hyp_chars']}` inserted"
+            context = f'in "{d["hyp_word"]}"'
+        else:
+            continue
+        rows.append({"pos": d["pos"], "change": desc, "context": context})
+
+    st.dataframe(
+        pd.DataFrame(rows),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Diff rendering
 # ---------------------------------------------------------------------------
 
@@ -342,8 +417,8 @@ def _page_compare():
         legacy_norm = normalize_full(legacy_raw)
         m_pdf = compute_metrics(gt_norm, legacy_norm)
         col_c, col_d = st.sidebar.columns(2)
-        col_c.metric("PDF CER", f"{m_pdf['cer']:.2%}")
-        col_d.metric("PDF WER", f"{m_pdf['wer']:.2%}")
+        col_c.metric("Code CER", f"{m_pdf['cer']:.2%}")
+        col_d.metric("Code WER", f"{m_pdf['wer']:.2%}")
     else:
         legacy_norm = None
 
@@ -351,7 +426,7 @@ def _page_compare():
     if ai_raw:
         st.sidebar.markdown(f"**AI OCR**: {len(ai_norm)} chars (norm) / {len(ai_raw)} raw")
     if legacy_raw:
-        st.sidebar.markdown(f"**PDF OCR**: {len(legacy_norm)} chars (norm) / {len(legacy_raw)} raw")
+        st.sidebar.markdown(f"**Legacy OCR Code**: {len(legacy_norm)} chars (norm) / {len(legacy_raw)} raw")
 
     # --- Summary table (combined from all OCR dirs) ---
     all_csvs = []
@@ -370,7 +445,7 @@ def _page_compare():
                     return ["background-color: #fff3cd"] * len(row)
                 return [""] * len(row)
 
-            pct_cols = [c for c in summary_df.columns if c in ("cer", "wer", "pdf_cer", "pdf_wer", "cer_improvement", "wer_improvement")]
+            pct_cols = [c for c in summary_df.columns if c in ("cer", "wer", "code_cer", "code_wer", "cer_improvement", "wer_improvement")]
             styled = summary_df.style.apply(highlight_current, axis=1).format(
                 {c: "{:.2%}" for c in pct_cols}
             )
@@ -397,11 +472,21 @@ def _page_compare():
     # --- Main content area ---
     if view_mode == "Raw":
         _show_texts(ai_raw, legacy_raw, gt_raw)
+        # Show differences summary for raw texts
+        if ai_raw and gt_raw:
+            _render_diff_summary(gt_raw, ai_raw, label="AI OCR (raw)")
+        if legacy_raw and gt_raw:
+            _render_diff_summary(gt_raw, legacy_raw, label="Legacy OCR (raw)")
     elif view_mode == "Normalized":
         _show_texts(
             ai_norm, legacy_norm, gt_norm,
             label_suffix=" (normalized)",
         )
+        # Show differences summary for normalized texts
+        if ai_norm and gt_norm:
+            _render_diff_summary(gt_norm, ai_norm, label="AI OCR (normalized)")
+        if legacy_norm and gt_norm:
+            _render_diff_summary(gt_norm, legacy_norm, label="Legacy OCR (normalized)")
     elif view_mode.startswith("Diff"):
         char_level = "character" in view_mode
         _show_diff(ai_raw, ai_norm, legacy_raw, legacy_norm, gt_raw, gt_norm, char_level)
@@ -420,7 +505,7 @@ def _show_texts(
     if ai_text is not None:
         panels.append(("AI OCR", ai_text))
     if legacy_text is not None:
-        panels.append(("Legacy PDF", legacy_text))
+        panels.append(("Legacy OCR Code", legacy_text))
     if gt_text is not None:
         panels.append(("Ground Truth", gt_text))
 
@@ -465,7 +550,7 @@ def _show_diff(
     if ai_norm is not None:
         panels.append(("AI OCR vs Ground Truth", ai_norm))
     if legacy_norm is not None:
-        panels.append(("Legacy PDF vs Ground Truth", legacy_norm))
+        panels.append(("Legacy OCR Code vs Ground Truth", legacy_norm))
 
     if not panels:
         st.warning("No OCR output available for diff.")
@@ -526,7 +611,7 @@ def _show_metrics_detail(
     if ai_norm is not None:
         sources.append(("AI OCR", ai_norm))
     if legacy_norm is not None:
-        sources.append(("Legacy PDF", legacy_norm))
+        sources.append(("Legacy OCR Code", legacy_norm))
 
     if not sources:
         st.warning("No OCR output available.")
