@@ -1,0 +1,82 @@
+[[HEADER]]
+Official Journal of the European Communities
+[[/HEADER]]
+
+1 階
+First floor
+Rez-de-chaussée
+
+[[C1]]
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+[[/C1]]
+
+[[C2]]
+| 日本語 | 英語 | フランス語 |
+|--------|------|------------|
+| 1 階 | (Rez-de-chaussée) |  |
+| 1 倉庫 | Storage | Entrepôt |
+| 2 宇衡室 | Guard Room | Salle de garde |
+| 3 仮眠室 | Sleeping Room | Dortoir |
+| 4 資料保管庫 | Record Archives | Archives |
+| 5 印刷室 | Printing Room | Salle d'imprimerie |
+| 6 便所 | Lavatory | Toilettes |
+| 7 入口ホール | Entrance Hall | Vestibule |
+| 8 受付 | Receptionists | Réception |
+| 9 協会事務室 | Office Room | Bureau |
+| 10 階段 | Staircase | Escalier |
+| 11 力×ラマ>控室 | Cameramen Waiting Room | Salle d'attente pour les photographes |
+| 12 スチール現像室 | Photo Development Laboratory | Laboratoire de développement de photo |
+| 13 国内新聞放送 | Domestic Newspapers and Broadcasting Companies | Journaux japonais et Radio-diffusion |
+| 14 国内雑誌・業界紙 | Domestic Magazines and Trade Newspapers | Revues japonaises et Journaux économiques |
+| 15 VIP控室 | VIP Room | Salle pour V.I.P. |
+| 16 VIP入口ホー | Entrance for VIP | Vestibule pour V.I.P. |
+| 17 VIP便所・化粧室 | Lavatory for VIP | Toilette et Vestiaire pour V.I.P. |
+| Dressing Room for VIP |  |  |
+| 18 VIP通路 | Passage for VIP | Passage pour V.I.P. |
+| 19 VIP階段 | Staircase For VIP | Escalier pour V.I.P. |
+| 20 ワー室 | Shower bath | Douches |
+| 21 機械ロッカー室 | Equipment Storeroom | Entrepôt pour l'équipement |
+| 22 サービス窓口 | Encounter Service Room | Guichet de renseignements |
+| 23 打合せ室 | Consultation Room | Salle de consultation |
+| 24 国内ニュース映画 | Domestic Newsreel | Film d'actualités japonaises |
+| 25 会議室 | Conference Room | Salle de Conférence |
+| 26 光庭 | Interior Garden | Jardin intérieur |
+| 27 リフト | Elevator | Ascenseur |
+| 28 空調機械室 | Air-condition Control Room | Salle de contrôle de la climatisation |
+| 29 給湯室 | Kitchenette | Petite cuisine |
+| 30 水ポンプ室 | Pumps Room | Salle des pompes |
+[[/C2]]
+
+[[FOOTER]]
+L 123/45
+[[/FOOTER]]

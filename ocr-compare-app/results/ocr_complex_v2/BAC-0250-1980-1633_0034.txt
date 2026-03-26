@@ -1,0 +1,49 @@
+```markdown
+[[HEADER]]0034[[/HEADER]]
+
+Beschreibung der Ware entsprechend  
+der veröffentlichten Preisliste  
+
+10.a Preisliste (vom Importeur anzugeben)  
+| Artikel 1 | Artikel 2 | Artikel 3 | Artikel 4 | Artikel |
+|-----------|-----------|-----------|-----------|-----------|
+| Oberhausen |           |           |           |           |
+| Ia Walz-  |           |           |           |           |
+| draht     |           |           |           |           |
+| Baustahl- |           |           |           |           |
+| mattengite|           |           |           |           |
+| φ 7 - 9   |           |           |           |           |
+| 1.973 te  |           |           |           |           |
+| 905,--    |           |           |           |           |
+| --        |           |           |           |           |
+| 905,--    |           |           |           |           |
+| --        |           |           |           |           |
+
+10.b Paritäts-punkt  
+10.c Ware: Erzeugnis  
+Qualität  
+Maße  
+Menge  
+
+Preis entsprechend einer veröffentlichten Preisliste  
+
+10.d Grundpreis (einschl. vorübergehender Rabatt)  
+Aufpreis für:  
+Qualität  
+Maße  
+Menge  
+Verpackung  
+Ladekosten  
+Andere (bitte angeben)  
+
+Bruttopreis pro Tonne  
+Nachlässe: Menge  
+Händler  
+Andere  
+(bitte angeben)  
+
+Nettopreis pro Tonne  
+905,--  
+
+[[FOOTER]]- 4 -[[/FOOTER]]
+```
