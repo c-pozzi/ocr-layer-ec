@@ -1,0 +1,5 @@
+streamlit
+pandas
+jiwer
+python-Levenshtein
+PyMuPDF

@@ -1,0 +1,12 @@
+```markdown
+Personnel de la Commission par catégorie
+
+| Catégorie | Effectifs | Pourcentage |
+|---|---|---|
+| A (administrateurs) | 2.845 | 28,4% |
+| B (assistants) | 1.932 | 19,3% |
+| D (agents de service) | 856 | 8,5% |
+| Total | 10.023 | 100,0% |
+
+Note: Chiffres au 31 décembre 1982.
+```

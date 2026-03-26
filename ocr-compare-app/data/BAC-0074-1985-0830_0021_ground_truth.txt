@@ -1,0 +1,42 @@
+0021
+TABLEAU I : PERSONNEL OCCUPE DANS LES INDUSTRIES DE LA COMMUNAUTE
+AU 31 DECEMBRE 1956
+
+Source : Haute Autorité, Division des Statistiques
+
+(en milliers de personnes)
+
+| | | Ouvriers | Apprentis | Employés | Total |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Mines de houille | Allemagne (R.F.) | 442,8 | 47,9 | 44,2 | 534,9 |
+| | Sarre | 52,3 | 5,1 | 6,2 | 63,6 |
+| | Belgique | 133,2 | 1,9 | 14,7 | 149,8 |
+| | France (1) | 206,4 | 7,2 | 26,7 | 240,3 |
+| | Italie | 6,0 | - | 0,7 | 6,7 |
+| | Pays-Bas | 50,4 | 4,4 | 6,5 | 61,3 |
+| | | | | | |
+| | Communauté : | 891,1 | 66,5 | 99,0 | 1 056,6 |
+| | | | | | |
+| Sidérurgie | Allemagne (R.F.) | 158,4 | 5,6 | 21,4 | 185,4 |
+| | Sarre | 26,9 | 0,9 | 4,0 | 31,8 |
+| | Belgique | 52,2 | - | 7,2 | 59,4 |
+| | France (2) | 125,9 | 2,6 | 23,5 | 152,0 |
+| | Italie | 55,3 | 0,2 | 7,3 | 62,8 |
+| | Luxembourg | 18,3 | 0,3 | 2,0 | 20,6 |
+| | Pays-Bas | 7,3 | 0,2 | 3,0 | 10,5 |
+| | | | | | |
+| | Communauté : | 444,3 | 9,8 | 68,4 | 522,5 |
+| | | | | | |
+| Mines de fer | Allemagne (R.F.) | 19,8 | 0,9 | 2,2 | 22,9 |
+| | Belgique | 0,0 | - | 0,0 | 0,0 |
+| | France | 24,4 | 1,0 | 2,9 | 28,3 |
+| | Italie | 3,8 | 0,0 | 0,3 | 4,1 |
+| | Luxembourg | 2,4 | - | 0,2 | 2,6 |
+| | | | | | |
+| | Communauté : | 50,4 | 1,9 | 5,6 | 57,9 |
+| | | | | | |
+| TOTAL COMMUNAUTE : | | 1 385,8 | 78,2 | 173,0 | 1 637,0 |
+
+(1) Y compris petites mines non nationalisées.
+(2) Chiffres rectifiés par rapport aux chiffres donnés dans le Rapport Général
+sur l'activité de la Communauté.
