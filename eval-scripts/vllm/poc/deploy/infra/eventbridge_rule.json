@@ -1,0 +1,12 @@
+{
+  "Name": "ocr-pipeline-daily",
+  "Description": "Trigger OCR pipeline at 02:00 UTC daily",
+  "ScheduleExpression": "cron(0 2 * * ? *)",
+  "State": "ENABLED",
+  "Targets": [
+    {
+      "Id": "ocr-lambda-trigger",
+      "Arn": "arn:aws:lambda:REGION:ACCOUNT:function:ocr-pipeline-trigger"
+    }
+  ]
+}
