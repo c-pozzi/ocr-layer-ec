@@ -64,7 +64,10 @@ cleanup.sh
 
 # Large binary data directories
 archive/
-ocr-input/
+ocr-input
+
+# Benchmark server logs (large)
+**/benchmark_a100/server_logs/
 
 # Large binary files in evaluation samples
 ocr-evaluation-samples/**/*.tif
@@ -83,6 +86,19 @@ ocr-evaluation-samples/**/*.xlsx
 .profile
 .sudo_as_admin_successful
 .wget-hsts
+.gitconfig
+.lesshst
+
+# Package managers
+.pixi/
+
+# Separate project directories
+modular/
+pytorch-lightning/
+
+# Packaged app artifacts
+ocr-compare-app/
+ocr-compare-app.tar.gz
 
 # AWS credentials
 .aws/
