@@ -1,0 +1,22 @@
+{
+  "configs_tested": 15,
+  "total_wall_time_sec": 13257.5,
+  "timestamp": "2026-03-20T18:26:42.064271+00:00",
+  "configs": [
+    "7b_tp1_eager_m90",
+    "7b_tp1_graphs_m90",
+    "7b_tp1_graphs_m95",
+    "7b_tp1_graphs_m95_s128",
+    "7b_tp1_graphs_m95_s256",
+    "7b_tp1_graphs_m95_bt16k",
+    "7b_tp1_graphs_m95_bt32k",
+    "7b_tp2_graphs_m95",
+    "32b_tp1_graphs_m90",
+    "32b_tp1_graphs_m95",
+    "32b_tp2_eager_m95",
+    "32b_tp2_graphs_m95",
+    "32b_tp2_graphs_m95_s128",
+    "32b_tp4_graphs_m95",
+    "32b_tp8_graphs_m95"
+  ]
+}

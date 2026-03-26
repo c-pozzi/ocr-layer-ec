@@ -1,0 +1,168 @@
+{
+  "config_id": "7b_tp2_graphs_m95",
+  "model": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+  "tp": 2,
+  "num_servers": 4,
+  "cuda_graphs": true,
+  "gpu_mem_util": 0.95,
+  "max_num_seqs": 128,
+  "max_model_len": 8192,
+  "max_num_batched_tokens": null,
+  "concurrency_per_server": 8,
+  "pages_per_workload": 200,
+  "num_runs": 3,
+  "gpu_memory_snapshot": {
+    "gpus": [
+      {
+        "index": 0,
+        "memory_used_mb": 0,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 40442,
+        "gpu_utilization_pct": 0
+      },
+      {
+        "index": 1,
+        "memory_used_mb": 0,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 40442,
+        "gpu_utilization_pct": 0
+      },
+      {
+        "index": 2,
+        "memory_used_mb": 0,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 40442,
+        "gpu_utilization_pct": 0
+      },
+      {
+        "index": 3,
+        "memory_used_mb": 0,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 40442,
+        "gpu_utilization_pct": 0
+      },
+      {
+        "index": 4,
+        "memory_used_mb": 37751,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2691,
+        "gpu_utilization_pct": 65
+      },
+      {
+        "index": 5,
+        "memory_used_mb": 37751,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2691,
+        "gpu_utilization_pct": 95
+      },
+      {
+        "index": 6,
+        "memory_used_mb": 37751,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2691,
+        "gpu_utilization_pct": 37
+      },
+      {
+        "index": 7,
+        "memory_used_mb": 37751,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2691,
+        "gpu_utilization_pct": 66
+      }
+    ],
+    "total_used_mb": 151004,
+    "total_capacity_mb": 327680,
+    "utilization_pct": 46.1
+  },
+  "workload_results": {
+    "classify": [
+      {
+        "total_requests": 200,
+        "successful": 200,
+        "errors": 0,
+        "wall_time_sec": 62.59,
+        "pages_per_sec": 3.1954,
+        "pages_per_min": 191.73,
+        "avg_latency_sec": 4.9294,
+        "p50_latency_sec": 4.7464,
+        "p95_latency_sec": 7.1951,
+        "p99_latency_sec": 9.8727,
+        "min_latency_sec": 2.2529,
+        "max_latency_sec": 9.8955
+      },
+      {
+        "total_requests": 200,
+        "successful": 200,
+        "errors": 0,
+        "wall_time_sec": 36.1,
+        "pages_per_sec": 5.5408,
+        "pages_per_min": 332.45,
+        "avg_latency_sec": 2.8476,
+        "p50_latency_sec": 2.834,
+        "p95_latency_sec": 3.6292,
+        "p99_latency_sec": 3.9749,
+        "min_latency_sec": 1.6083,
+        "max_latency_sec": 3.9754
+      },
+      {
+        "total_requests": 200,
+        "successful": 200,
+        "errors": 0,
+        "wall_time_sec": 36.06,
+        "pages_per_sec": 5.5468,
+        "pages_per_min": 332.81,
+        "avg_latency_sec": 2.8296,
+        "p50_latency_sec": 2.8555,
+        "p95_latency_sec": 3.8842,
+        "p99_latency_sec": 3.9843,
+        "min_latency_sec": 1.2964,
+        "max_latency_sec": 4.0311
+      }
+    ],
+    "simple_ocr": [
+      {
+        "total_requests": 200,
+        "successful": 197,
+        "errors": 3,
+        "wall_time_sec": 263.27,
+        "pages_per_sec": 0.7483,
+        "pages_per_min": 44.9,
+        "avg_latency_sec": 16.3918,
+        "p50_latency_sec": 15.2638,
+        "p95_latency_sec": 37.7891,
+        "p99_latency_sec": 93.23,
+        "min_latency_sec": 0.6062,
+        "max_latency_sec": 107.0278
+      },
+      {
+        "total_requests": 200,
+        "successful": 197,
+        "errors": 3,
+        "wall_time_sec": 253.02,
+        "pages_per_sec": 0.7786,
+        "pages_per_min": 46.72,
+        "avg_latency_sec": 15.1897,
+        "p50_latency_sec": 14.317,
+        "p95_latency_sec": 34.5614,
+        "p99_latency_sec": 87.2316,
+        "min_latency_sec": 0.6026,
+        "max_latency_sec": 99.8033
+      },
+      {
+        "total_requests": 200,
+        "successful": 197,
+        "errors": 3,
+        "wall_time_sec": 252.99,
+        "pages_per_sec": 0.7787,
+        "pages_per_min": 46.72,
+        "avg_latency_sec": 15.1739,
+        "p50_latency_sec": 14.2737,
+        "p95_latency_sec": 34.5911,
+        "p99_latency_sec": 87.2302,
+        "min_latency_sec": 0.6114,
+        "max_latency_sec": 99.8456
+      }
+    ]
+  },
+  "timestamp": "2026-03-20T16:11:59.852424+00:00"
+}

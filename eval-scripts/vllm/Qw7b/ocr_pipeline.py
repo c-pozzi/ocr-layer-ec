@@ -8,13 +8,15 @@ This script:
 4. Compares against ground truth and calculates CER
 
 Usage:
-1. First run classify_documents.py to generate classification_results.csv
+1. First run classify_prompts.py to generate classification_results_{variant}.csv
 2. Start vLLM servers:
-   ./start_vllm_servers.sh
+   ./start_vllm_servers.sh       (for bf16)
+   ./start_vllm_servers_int4.sh  (for int4)
 3. Run this script:
-   python ocr_pipeline.py
+   python ocr_pipeline.py [--model {bf16,int4}]
 """
 
+import argparse
 import asyncio
 import aiohttp
 import base64
@@ -31,19 +33,34 @@ import fitz  # PyMuPDF
 from prompts import build_prompt
 
 # =============================================================================
+# CLI ARGUMENTS
+# =============================================================================
+
+MODEL_CONFIGS = {
+    "bf16": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "int4": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+}
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="OCR pipeline with classification-based prompts")
+    parser.add_argument(
+        "--model", choices=list(MODEL_CONFIGS.keys()), default="bf16",
+        help="Model variant to use: bf16 (default) or int4 (AWQ quantized)"
+    )
+    return parser.parse_args()
+
+# =============================================================================
 # CONFIGURATION
 # =============================================================================
 
 # Paths (relative to this script)
 SCRIPT_DIR = Path(__file__).resolve().parent
 SAMPLES_DIR = SCRIPT_DIR.parents[2] / "ocr-evaluation-samples"
-CLASSIFICATION_CSV = SCRIPT_DIR / "results_classify" / "classification_results.csv"
-OUTPUT_DIR = SCRIPT_DIR / "results_classify" / "ocr_outputs"
 
 # vLLM server configuration
 VLLM_SERVERS = [f"http://localhost:{8000 + i}" for i in range(8)]
 VLLM_ENDPOINT = "/v1/chat/completions"
-MODEL_NAME = "Qwen/Qwen2.5-VL-7B-Instruct"
+MODEL_NAME = MODEL_CONFIGS["bf16"]  # overridden in main() based on --model arg
 
 # Processing
 MAX_CONCURRENT = 8
@@ -339,16 +356,24 @@ async def process_document(
 
 async def main():
     """Main entry point."""
-    
+    args = parse_args()
+
+    # Set model name based on variant
+    global MODEL_NAME
+    MODEL_NAME = MODEL_CONFIGS[args.model]
+    CLASSIFICATION_CSV = SCRIPT_DIR / "results_classify" / f"classification_results_{args.model}.csv"
+    OUTPUT_DIR = SCRIPT_DIR / "results_classify" / f"ocr_outputs_{args.model}"
+
     # Create output directory
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     # Load classification results
+    print(f"Model variant: {args.model} ({MODEL_NAME})")
     print(f"Loading classifications from {CLASSIFICATION_CSV}")
     if not CLASSIFICATION_CSV.exists():
-        print(f"ERROR: Classification CSV not found. Run classify_documents.py first.")
+        print(f"ERROR: Classification CSV not found. Run classify_prompts.py --model {args.model} first.")
         return
-    
+
     classifications = load_classification_results(CLASSIFICATION_CSV)
     print(f"Loaded classifications for {len(classifications)} files")
     

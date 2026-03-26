@@ -1,0 +1,1 @@
+[[FOOTER]]L 123/45[[/FOOTER]]

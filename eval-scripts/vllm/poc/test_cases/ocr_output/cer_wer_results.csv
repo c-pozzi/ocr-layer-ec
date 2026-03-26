@@ -1,0 +1,11 @@
+doc_id,gt_chars,ocr_chars,cer,wer
+TEST-01-perfect_ocr,559,559,0.0,0.0
+TEST-02-minor_typos,428,428,0.0093,0.0606
+TEST-03-missing_accent,429,429,0.0583,0.375
+TEST-04-table_simple,377,406,0.0769,0.0755
+TEST-05-table_number_errors,283,283,0.0106,0.0526
+TEST-06-missing_table_rows,274,218,0.2044,0.2
+TEST-07-hallucinated_text,55,321,4.8364,5.5714
+TEST-08-truncated_ocr,954,334,0.6499,0.662
+TEST-09-table_column_mismatch,337,337,0.0772,0.0741
+TEST-10-dash_and_unicode,351,351,0.0,0.0

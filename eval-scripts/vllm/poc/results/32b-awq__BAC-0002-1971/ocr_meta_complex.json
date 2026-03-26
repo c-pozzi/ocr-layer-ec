@@ -1,0 +1,15 @@
+{
+  "tier": "complex",
+  "model": "Qwen/Qwen2.5-VL-32B-Instruct-AWQ",
+  "instance": "g5.12xlarge",
+  "pages_processed": 3823,
+  "total_errors": 1089,
+  "wall_time_sec": 37475.66,
+  "pages_per_sec": 0.102,
+  "num_servers": 2,
+  "concurrency_per_server": 4,
+  "total_concurrency": 8,
+  "max_tokens": 4096,
+  "dpi": 150,
+  "timestamp": "2026-03-04T19:50:03.706536+00:00"
+}

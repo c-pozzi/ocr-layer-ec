@@ -1,0 +1,11 @@
+Exportations de la CECA par pays de destination (1000 tonnes)
+
+| | Produits sidérurgiques | | Houille | |
+| :--- | :--- | :--- | :--- | :--- |
+| Pays | Quantité | Valeur (Mio UCE) | Quantité | Valeur (Mio UCE) |
+| Etats-Unis | 1.234 | 456,7 | 890 | 123,4 |
+| Japon | 567 | 234,5 | 345 | 78,9 |
+| Suisse | 2.345 | 678,9 | 1.234 | 345,6 |
+| Autriche | 1.890 | 567,8 | 678 | 189,0 |
+| Suède | 456 | 123,4 | 234 | 56,7 |
+| Total pays tiers | 6.492 | 2.061,3 | 3.381 | 793,6 |

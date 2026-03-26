@@ -1,0 +1,30 @@
+0034
+        - 3 -
+Beschreibung der Ware entsprechend
+der veröffentlichten Preisliste
+
+| 10.a Preisliste (vom Importeur<br>anzugeben) | Artikel 1 | Artikel 2 | Artikel 3 | Artikel 4 | Artikel |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 10.b Paritäts-punkt | Oberhausen | | | | |
+| 10.c Ware: Erzeugnis | Ia Walz-<br>draht | | | | |
+| Qualität | Baustahl-<br>mattengüte | | | | |
+| Maße | ø 7 - 9 | | | | |
+| Menge | 1.973 to | | | | |
+| Preis entsprechend einer ver-<br>öffentlichten Preisliste | | | | | |
+| [[ILLEGIBLE]]0 d Grundpreis (einschl. vor-<br>übergehender Rabatt) | 905,-- | | | | |
+| Aufpreis für: |  | | | | |
+| Qualität | | | | | |
+| Maße | -- | | | | |
+| Menge | | | | | |
+| Verpackung | | | | | |
+| Ladekosten | | | | | |
+| Andere (bitte angeben) | | | | | |
+| Bruttopreis pro Tonne | 905,-- | | | | |
+| Nachlässe: Menge | | | | | |
+| Händler | -- | | | | |
+| Andere<br>(bitte angeben) | | | | | |
+
+Nettopreis pro Tonne        905,--
+
+        - 4 -
+[[H]] 1612 [[/H]]
