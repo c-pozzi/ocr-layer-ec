@@ -1,0 +1,124 @@
+{
+  "config_id": "32b_tp4_graphs_m95",
+  "model": "Qwen/Qwen2.5-VL-32B-Instruct-AWQ",
+  "tp": 4,
+  "num_servers": 2,
+  "cuda_graphs": true,
+  "gpu_mem_util": 0.95,
+  "max_num_seqs": 64,
+  "max_model_len": 16384,
+  "max_num_batched_tokens": null,
+  "concurrency_per_server": 8,
+  "pages_per_workload": 100,
+  "num_runs": 3,
+  "gpu_memory_snapshot": {
+    "gpus": [
+      {
+        "index": 0,
+        "memory_used_mb": 38135,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2307,
+        "gpu_utilization_pct": 96
+      },
+      {
+        "index": 1,
+        "memory_used_mb": 38167,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2275,
+        "gpu_utilization_pct": 42
+      },
+      {
+        "index": 2,
+        "memory_used_mb": 38167,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2275,
+        "gpu_utilization_pct": 16
+      },
+      {
+        "index": 3,
+        "memory_used_mb": 38135,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2307,
+        "gpu_utilization_pct": 49
+      },
+      {
+        "index": 4,
+        "memory_used_mb": 38135,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2307,
+        "gpu_utilization_pct": 97
+      },
+      {
+        "index": 5,
+        "memory_used_mb": 38167,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2275,
+        "gpu_utilization_pct": 96
+      },
+      {
+        "index": 6,
+        "memory_used_mb": 38167,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2275,
+        "gpu_utilization_pct": 52
+      },
+      {
+        "index": 7,
+        "memory_used_mb": 38135,
+        "memory_total_mb": 40960,
+        "memory_free_mb": 2307,
+        "gpu_utilization_pct": 96
+      }
+    ],
+    "total_used_mb": 305208,
+    "total_capacity_mb": 327680,
+    "utilization_pct": 93.1
+  },
+  "workload_results": {
+    "complex_ocr": [
+      {
+        "total_requests": 100,
+        "successful": 95,
+        "errors": 5,
+        "wall_time_sec": 302.35,
+        "pages_per_sec": 0.3142,
+        "pages_per_min": 18.85,
+        "avg_latency_sec": 35.4692,
+        "p50_latency_sec": 34.2266,
+        "p95_latency_sec": 67.5939,
+        "p99_latency_sec": 104.759,
+        "min_latency_sec": 3.4688,
+        "max_latency_sec": 104.759
+      },
+      {
+        "total_requests": 100,
+        "successful": 95,
+        "errors": 5,
+        "wall_time_sec": 286.98,
+        "pages_per_sec": 0.331,
+        "pages_per_min": 19.86,
+        "avg_latency_sec": 32.3608,
+        "p50_latency_sec": 31.4104,
+        "p95_latency_sec": 61.8491,
+        "p99_latency_sec": 98.0739,
+        "min_latency_sec": 3.1527,
+        "max_latency_sec": 98.0739
+      },
+      {
+        "total_requests": 100,
+        "successful": 95,
+        "errors": 5,
+        "wall_time_sec": 286.01,
+        "pages_per_sec": 0.3322,
+        "pages_per_min": 19.93,
+        "avg_latency_sec": 32.2653,
+        "p50_latency_sec": 31.2689,
+        "p95_latency_sec": 61.5591,
+        "p99_latency_sec": 98.0668,
+        "min_latency_sec": 3.1577,
+        "max_latency_sec": 98.0668
+      }
+    ]
+  },
+  "timestamp": "2026-03-20T18:04:40.823746+00:00"
+}
