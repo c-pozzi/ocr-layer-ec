@@ -43,6 +43,13 @@ Benchmarking OCR quality on historical European Commission documents (BAC/INV se
 │   │       ├── compare_app.py           # Streamlit: AI OCR vs legacy PDF text vs ground truth
 │   │       ├── start_vllm_32b_awq.sh    # Launch 2x 32B AWQ servers (TP=2, ports 8000-8001)
 │   │       ├── start_vllm_72b_awq.sh    # Launch 72B AWQ server
+│   │       ├── benchmark/               # A100 throughput benchmark suite
+│   │       │   ├── benchmark_config.py      # Config matrix (15 configs: 8×7B + 7×32B)
+│   │       │   ├── benchmark_server.py      # Server lifecycle: start/stop/health/GPU memory
+│   │       │   ├── benchmark_runner.py      # Orchestrator: sample pages, loop configs, run workloads
+│   │       │   ├── benchmark_report.py      # Summary tables, cost analysis, baseline comparison
+│   │       │   ├── start_benchmark.sh       # Entry point (env setup, conda, run + report)
+│   │       │   └── ami_prep.sh              # Pre-AMI: download models, verify deps, smoke tests
 │   │       └── results/
 │   │           ├── awq__BAC-0002-1971/          # 7B AWQ, first batch
 │   │           ├── 32b-awq__BAC-0002-1971/      # 32B AWQ, first batch
@@ -170,6 +177,60 @@ All scripts use `Path(__file__).resolve().parent` to derive paths relative to th
 - Legacy scripts in `Qw7b/` that imported `prompts.py` (now in `poc/`) are broken — `classify_prompts.py`, `ocr_pipeline.py`
 - 32B AWQ with `--max-model-len 8192` causes context overflow for complex pages (image tokens + prompt + max_tokens). Use 16384.
 - Some simple pages produce very short output (e.g., INV-0015-2019-0852_0437: 29 chars) — model may parrot prompt examples instead of OCR'ing
+
+## A100 Benchmark Suite
+
+Located in `eval-scripts/vllm/poc/benchmark/`. Tests optimal vLLM serving configs on p4d.24xlarge (8× A100 80GB) for the three OCR pipeline workloads.
+
+### Goal
+
+Find optimal throughput/latency/cost to handle ~9,000 pages/day. Baselines from g5.12xlarge (4× A10G): 7B=0.36 pages/sec, 32B=0.10 pages/sec.
+
+### Config Matrix (15 configs)
+
+**7B AWQ (8 configs)** — classifier + simple OCR workloads:
+- Varies: eager vs CUDA graphs, gpu_mem_util (0.90/0.95), max_num_seqs (64/128/256), max_batched_tokens (default/16K/32K), TP=1 vs TP=2
+- Each: 200 pages × 3 runs per workload
+
+**32B AWQ (7 configs)** — complex OCR workload:
+- Key test: TP=1 (impossible on A10G 24GB, may fit on A100 80GB → 8 servers)
+- Varies: TP (1/2/4/8), eager vs graphs, max_num_seqs (32/64/128)
+- Each: 100 pages × 3 runs
+
+### Running on p4d.24xlarge
+
+```bash
+# 1. Prepare the AMI (once)
+bash eval-scripts/vllm/poc/benchmark/ami_prep.sh
+
+# 2. Run all benchmarks (~1.5-2 hours)
+bash eval-scripts/vllm/poc/benchmark/start_benchmark.sh
+
+# 3. Run subset
+bash eval-scripts/vllm/poc/benchmark/start_benchmark.sh --configs 7b
+bash eval-scripts/vllm/poc/benchmark/start_benchmark.sh --configs 32b_tp1_graphs_m95
+
+# 4. Generate report only (after benchmark)
+python eval-scripts/vllm/poc/benchmark/benchmark_report.py
+```
+
+### Architecture
+
+- **benchmark_config.py**: `BenchmarkConfig` dataclass generates vllm serve args, CUDA_VISIBLE_DEVICES, server URLs
+- **benchmark_server.py**: Subprocess management, health polling, nvidia-smi snapshots. NVLink-aware (no NCCL_P2P_DISABLE on p4d)
+- **benchmark_runner.py**: Pre-renders 9K sampled pages to base64 in memory, then loops configs with semaphore-based async concurrency (8/server). Reuses `poc_utils.ocr_image_async`, `classify_image_async`, `prompts.build_simple_prompt_versioned`
+- **benchmark_report.py**: Aggregates 3 runs → mean/std throughput, p50/p95/p99 latency, cost_per_1000_pages ($32.77/hr p4d rate), baseline speedup comparison
+
+### Data
+
+- Input: `/home/ubuntu/ocr-input/` — 2,400 PDFs, ~598K pages
+- Samples 9,000 pages (seed=42), pre-renders at 150 DPI
+- Results: `eval-scripts/vllm/poc/results/benchmark_a100/<config_id>/meta.json` + per-run CSVs
+- Summary: `eval-scripts/vllm/poc/results/benchmark_a100/summary.csv`
+
+### Python env
+
+`deepseek-ocr` (conda). Deps: vllm, aiohttp, pymupdf (fitz), pandas.
 
 ## Current Branch
 
