@@ -97,8 +97,8 @@ modular/
 pytorch-lightning/
 
 # Packaged app artifacts
-ocr-compare-app/
 ocr-compare-app.tar.gz
+ocr-compare-app/.venv/
 
 # AWS credentials
 .aws/
