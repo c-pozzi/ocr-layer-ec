@@ -1,4 +1,4 @@
-doc_id,gt_chars,ocr_chars,cer,wer,pdf_chars,pdf_cer,pdf_wer,cer_improvement,wer_improvement
+doc_id,gt_chars,ocr_chars,cer,wer,code_chars,code_cer,code_wer,cer_improvement,wer_improvement
 BAC-0042-1988-1454_0074,3325,3377,0.0211,0.031,3326,0.6872,0.8579,0.6661,0.8269
 BAC-0074-1985-0830_0021,1053,1053,0.0019,0.0054,1059,0.0114,0.0811,0.0095,0.0757
 BAC-0097-2011-0012_0014,2172,2175,0.0272,0.1645,2149,0.68,0.8651,0.6528,0.7006
