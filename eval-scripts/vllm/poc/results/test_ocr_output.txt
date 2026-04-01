@@ -1,0 +1,119 @@
+Image: /home/ubuntu/Screenshot from 2026-04-01 13-32-09.png
+
+============================================================
+  Qwen 7B AWQ
+============================================================
+In China's Xinjiang region, the Uyghur people are mercilessly persecuted by 
+the state. Every aspect of life is under constant surveillance, reducing day-
+to-day life to a never-ending cycle of paranoia. Police use a mobile phone 
+application to access a plethora of personal information, while CCTV cameras
+are equipped with face and voice recognition technology, ensuring that any be
+havior deemed "illicit" can be stamped out immediately.
+
+Thousands are detained in "vocational training centres," aka transformation 
+through education camps, facilities more akin to internment camps where 
+torture and interrogation are commonplace. And most harrowingly of all, 
+reports of forced sterilization have emerged, indicating a calculated 
+attempt to ethnically cleanse the Xinjiang population. It is a situation 
+that harks back to the darkest days in human history.
+
+============================================================
+  Qwen 32B AWQ
+============================================================
+In China's **Xinjiang** region, the Uyghur people are mercilessly persecuted
+by the state. Every aspect of life is under constant surveillance, reducing
+day-to-day life to a never-ending cycle of paranoia. Police use a mobile 
+phone application to access a plethora of personal information, while CCTV 
+cameras are equipped with face and voice recognition technology, ensuring 
+that any behavior deemed "illicit" can be stamped out immediately.
+
+Thousands are detained in "vocational training centres," aka **transformation
+through education camps**, facilities more akin to internment camps where 
+torture and interrogation are commonplace. And most harrowingly of all, 
+reports of forced sterilization have emerged, indicating a calculated attempt
+to ethnically cleanse the **Xinjiang** population. It is a situation that 
+harks back to the darkest days in human history.
+
+
+
+
+Image: /home/ubuntu/Screenshot from 2026-04-01 14-08-34.png
+
+============================================================
+  Qwen 7B AWQ
+============================================================
+Thirty years ago to the day on June 4, 1989, Chinese troops opened fire on students campaigning for democracy in Beijing's Tiananmen Square.
+
+Nobody knows how many they killed. Some say hundreds, some say thousands. The Chinese authorities prefer not to say.
+
+The Tiananmen Square massacre is the country's most notorious crackdown on human rights. In the months leading up to the crackdown, students from around the country gathered in Tiananmen Square, outside the Forbidden City.
+
+Demanding increased freedoms, many of them camped out and raised a statue symbolising democracy.
+
+
+============================================================
+  Qwen 32B AWQ
+============================================================
+Thirty years ago to the day on June 4, 1989, Chinese troops opened fire on students campaigning for democracy in Beijing's Tiananmen Square.
+
+Nobody knows how many they killed. Some say hundreds, some say thousands. The Chinese authorities prefer not to say.
+
+The Tiananmen Square massacre is the country's most notorious crackdown on human rights. In the months leading up to the crackdown, students from around the country gathered in Tiananmen Square, outside the Forbidden City.
+
+Demanding increased freedoms, many of them camped out and raised a statue symbolising democracy.
+
+
+
+
+Image: /home/ubuntu/Screenshot from 2026-04-01 14-33-01.png
+
+============================================================
+  Qwen 7B AWQ
+============================================================
+六四事件
+条目 讨论 汉 漢 不转换
+阅读 查看源代码 查看历史 工具
+维基百科，自由的百科全书
+
+「六四」重定向至此。关于其他释义，请见「[六四 (消歧义)]」。
+如无特别说明，此條目中的“中國”指中华人民共和国。
+除特別註明外，此條目的時間均以中国夏时制（UTC+9:00）為準。
+
+{| | ! 本條目存在以下問題，請協助改善本條目或在討論頁針對議題發表看法。 [展开]
+|六四事件
+|中國學生運動、中华人民共和国民主运动及冷战的一部分
+|
+
+
+
+六四事件，又稱八九民运、八九学运或六四天安門事件，中国官方称1989年春夏之交的政治风波或反革命暴乱[2][12]，广义上指自1989年4月中旬开始的，以胡耀邦逝世为导火索[13]、由中国大陆高校学生发起、持续近两个月、要求政治改革的全境示威活動[14][註 3]；狭义上指六四清场，即同年6月3日晚间至6月4日凌晨，中央军委调集解放军戒严部队、武警部队与民警在天安门广场进行的武力清场行动[15][16][17]。
+
+六四事件是中华人民共和国历史的转折点[18][19][20]。事后，赵紫阳等中共改革派高层因同情抗议者而在同年被撤职，1980年代中国政治体制改革与新启蒙运动遭遇失败[21][22]，此后当局大幅收紧政治环境，出台法规限制示威游行[23]。此外经济改革亦于六四事件后放缓，直到1992年邓小平南巡为止[24][25][26]。六四事件引发了国际社会的高度关注，武力清场后，多数发达国家对镇压行为表示谴责甚至进行制裁，而发展中国家则多对镇压行为表示同情或支持[27][28]；尽管东方阵营国家看法不一，六四清場的惨痛後果令1989年年底东欧出现自由化呼聲時沒有發生流血衝突，學運最終仍有多少影響到东方阵营民主化浪潮的成功[29][30][31]。
+
+============================================================
+  Qwen 32B AWQ
+============================================================
+六四事件
+
+条目讨论汉不转换
+
+阅读查看源代码查看历史工具
+
+维基百科，自由的百科全书
+
+![warning](https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Warning.svg/20px-Warning.svg.png)「**六四**」重定向至此。关于其他释义，请见「**六四 (消歧义)**」。![warning](https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Warning.svg/20px-Warning.svg.png)如无特别说明，此條目中的“**中國**”指**中华人民共和国**。![warning](https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Warning.svg/20px-Warning.svg.png)除特別註明外，此條目的時間均以**中国夏时制**（UTC+9:00）為準。
+
+|  |  |
+| --- | --- |
+| ![warning](https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Warning.svg/20px-Warning.svg.png) | **本條目存在以下問題，請協助改善本條目或在討論頁針對議題發表看法。**[展开] |
+
+六四事件，又稱八九民运、八九学运或六四天安門事件，中国官方称**1989年春夏之交的政治风波**或**反革命暴乱**[2][12]，广义上指自1989年4月中旬开始的，以**胡耀邦逝世**为导火索[13]、由中国大陆**高校**学生发起、持续近两个月、要求政治改革的全境**示威活動**[14][註 3]；狭义上指**六四清场**，即同年6月3日晚间至6月4日凌晨，**中央军委**调集**解放军**戒严部队、**武警部队**与**民警**在**天安门广场**进行的武力清场行动[15][16][17]。
+
+六四事件是**中华人民共和国历史**的转折点[18][19][20]。事后，**赵紫阳**等**中共改革派**高层因同情抗议者而在同年**被撤职**，**1980年代中国政治体制改革**与**新启蒙运动**遭遇失败[21][22]，此后当局大幅收紧政治环境，出台法规限制示威游行[23]。此外经济改革亦于六四事件后放缓，直到1992年**邓小平南巡**为止[24][25][26]。六四事件引发了**国际社会的高度关注**，武力清场后，多数**发达国家**对镇压行为表示谴责甚至进行制裁，而**发展中国家**则多对镇压行为表示同情或支持[27][28]；尽管**东方阵营**国家看法不一，六四清場的惨痛後果令**1989年年底东欧出現自由化呼聲**時**沒有發生流血衝突**，學運最終仍有多少影響到东方阵营**民主化浪潮**的成功[29][30][31]。
+
+**六四事件**  
+**中國學生運動**、**中华人民共和国民主运动**及冷战的一部分
+
+![六四事件.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/June_4th_protest.jpg/220px-June_4th_protest.jpg)  
+![六四事件.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/June_4th_protest.jpg/220px-June_4th_protest.jpg)
+
